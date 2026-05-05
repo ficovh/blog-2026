@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on netlog</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos</title>
+      <link>http://localhost:1313/posts/vyos-dhcp-server/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/vyos-dhcp-server/</guid>
+      <description>Guía práctica para configurar el servidor DHCP en VyOS: subredes, opciones avanzadas, reservas estáticas y troubleshooting.</description>
+    </item>
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>Guía práctica para dejar un router VyOS funcional desde cero: NAT masquerade, zonas de firewall, rutas estáticas y subinterfaces 802.1Q.</description>
+    </item>
+    <item>
+      <title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</title>
+      <link>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</guid>
+      <description>Configuración completa de balanceo de carga y failover sobre dos enlaces WAN en MikroTik RouterOS v7 usando PCC, mangle, routing tables y netwatch.</description>
+    </item>
+    <item>
+      <title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</title>
+      <link>http://localhost:1313/posts/opnsense-vlans-firewall/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/opnsense-vlans-firewall/</guid>
+      <description>Configuración completa de 5 VLANs en OPNsense: asignación de IPs, aislamiento inter-VLAN vía firewall, permitir internet bloqueando RFC 1918, y hardening del perímetro.</description>
+    </item>
+    <item>
+      <title>Subnetting: From First Principles to VLSM</title>
+      <link>http://localhost:1313/posts/subnetting-reference/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/subnetting-reference/</guid>
+      <description>A practical subnetting guide covering binary math, CIDR notation, VLSM, and common exam-style calculations — written for engineers who want to understand the why.</description>
+    </item>
+    <item>
+      <title>BGP Graceful Restart: What It Is and When It Actually Helps</title>
+      <link>http://localhost:1313/posts/bgp-graceful-restart/</link>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/bgp-graceful-restart/</guid>
+      <description>A practical look at BGP Graceful Restart — the mechanism, its limitations, and when it genuinely improves convergence vs. when it&amp;#39;s just theater.</description>
+    </item>
+    <item>
+      <title>Network Automation with Ansible: A Practical Starting Point</title>
+      <link>http://localhost:1313/posts/network-automation-ansible/</link>
+      <pubDate>Fri, 05 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/network-automation-ansible/</guid>
+      <description>Getting started with Ansible for network automation — without the cargo-culting.</description>
+    </item>
+    <item>
+      <title>OSPF LSA Types: A Field Reference</title>
+      <link>http://localhost:1313/posts/ospf-lsa-types/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/ospf-lsa-types/</guid>
+      <description>A concise reference for OSPF LSA types 1–7, what they carry, and which routers originate them.</description>
+    </item>
+  </channel>
+</rss>

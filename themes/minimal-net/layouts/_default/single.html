@@ -1,0 +1,24 @@
+{{ define "main" }}
+<article>
+  <header class="post-header">
+    <div class="post-meta">
+      <time class="post-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "January 2, 2006" }}</time>
+      {{ if site.Params.showReadingTime }}
+        <span class="reading-time">· {{ .ReadingTime }} min read</span>
+      {{ end }}
+    </div>
+    <h1 class="post-title">{{ .Title }}</h1>
+    {{ if and site.Params.showTags .Params.tags }}
+    <div class="post-tags" style="margin-top:0.8rem">
+      {{ range .Params.tags }}
+        <a class="tag" href="{{ "/tags/" | relURL }}{{ . | urlize }}">{{ . }}</a>
+      {{ end }}
+    </div>
+    {{ end }}
+  </header>
+
+  <div class="post-content">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

@@ -1,0 +1,36 @@
+{{ define "main" }}
+<!-- GLightbox CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+
+<div class="gallery-section">
+  <div class="gallery-header">
+    <a class="gallery-back" href="{{ "/gallery" | relURL }}">← Gallery</a>
+    <h1 class="post-title">{{ .Title }}</h1>
+    {{ with .Description }}<p class="section-desc">{{ . }}</p>{{ end }}
+    {{ with .Date }}<span class="post-date">{{ .Format "January 2006" }}</span>{{ end }}
+  </div>
+
+  {{ with .Content }}
+  <div class="post-content gallery-intro">{{ . }}</div>
+  {{ end }}
+
+  {{ with .Params.photos }}
+  <div class="photo-grid">
+    {{ range . }}
+    <a class="glightbox photo-thumb" href="{{ .src }}"
+       data-title="{{ .caption }}"
+       data-description="{{ .description }}">
+      <img src="{{ .src }}" alt="{{ .caption }}" loading="lazy">
+      {{ with .caption }}<span class="thumb-caption">{{ . }}</span>{{ end }}
+    </a>
+    {{ end }}
+  </div>
+  {{ end }}
+</div>
+
+<!-- GLightbox JS -->
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script>
+  GLightbox({ selector: '.glightbox', touchNavigation: true, loop: true });
+</script>
+{{ end }}

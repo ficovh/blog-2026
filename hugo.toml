@@ -1,0 +1,64 @@
+baseURL = "https://blog.bsdguy.org/"
+languageCode = "en-us"
+title = "netlog"
+theme = "PaperMod"
+paginate = 10
+enableEmoji = true
+enableRobotsTXT = true
+buildDrafts = false
+buildFuture = false
+
+[params]
+  author = "Francisco Valladolid"
+  description = "Network engineer. Writing about routing, automation, and the internet's plumbing."
+  defaultTheme = "dark"
+  ShowReadingTime = true
+  ShowTags = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowWordCount = false
+  ShowRssButtonInSectionTermList = true
+  disableScrollToTop = false
+  comments = false
+
+  [params.homeInfoParams]
+    Title = "netlog"
+    Content = "Network engineer. Writing about routing, automation, and the internet's plumbing."
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/ficovh"
+
+[markup]
+  [markup.highlight]
+    style = "base16-snazzy"
+    lineNos = false
+    codeFences = true
+    guessSyntax = true
+    tabWidth = 2
+    noClasses = false
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[menu]
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts/"
+    weight = 10
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags/"
+    weight = 20
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    url = "/about/"
+    weight = 30

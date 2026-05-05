@@ -1,0 +1,11 @@
+<footer class="site-footer">
+  <div class="site-wrapper" style="display:contents">
+    <span class="footer-copy">© {{ now.Year }} {{ site.Params.author }} — built with Hugo</span>
+    <div class="footer-links">
+      {{ with site.Params.github }}<a href="{{ . }}" target="_blank" rel="noopener">github</a>{{ end }}
+      {{ with site.Params.linkedin }}<a href="{{ . }}" target="_blank" rel="noopener">linkedin</a>{{ end }}
+      {{ with site.Params.mastodon }}<a href="{{ . }}" target="_blank" rel="noopener">mastodon</a>{{ end }}
+      <a href="{{ "/index.xml" | relURL }}">rss</a>
+    </div>
+  </div>
+</footer>

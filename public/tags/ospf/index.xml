@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ospf on netlog</title>
+    <link>http://localhost:1313/tags/ospf/</link>
+    <description>Recent content in Ospf on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/ospf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>OSPF LSA Types: A Field Reference</title>
+      <link>http://localhost:1313/posts/ospf-lsa-types/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/ospf-lsa-types/</guid>
+      <description>A concise reference for OSPF LSA types 1–7, what they carry, and which routers originate them.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC | netlog</title>
+<meta name="keywords" content="mikrotik, routeros, wan, balanceo, firewall, mangle">
+<meta name="description" content="Configuración completa de balanceo de carga y failover sobre dos enlaces WAN en MikroTik RouterOS v7 usando PCC, mangle, routing tables y netwatch.">
+<meta name="author" content="Francisco Valladolid">
+<link rel="canonical" href="http://localhost:1313/posts/mikrotik-dual-wan-balanceo/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.199042e659bc7245f5609d333d6c044eb554a0640849bb874e1dff8eb0f57209.css" integrity="sha256-GZBC5lm8ckX1YJ0zPWwETrVUoGQISbuHTh3/jrD1cgk=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/mikrotik-dual-wan-balanceo/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="netlog (Alt + H)">netlog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC
+    </h1>
+    <div class="post-description">
+      Configuración completa de balanceo de carga y failover sobre dos enlaces WAN en MikroTik RouterOS v7 usando PCC, mangle, routing tables y netwatch.
+    </div>
+    <div class="post-meta"><span title='2026-04-07 00:00:00 +0000 UTC'>April 7, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>Francisco Valladolid</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>El balanceo de dos enlaces WAN en MikroTik es uno de esos temas donde la documentación oficial muestra el esqueleto pero omite los detalles que hacen que la configuración sea estable en producción. Este post cubre la implementación completa con <strong>Per-Connection Classifier (PCC)</strong>, failover automático con <strong>Netwatch</strong>, y las reglas de mangle necesarias para que el tráfico saliente y las conexiones establecidas se comporten correctamente.</p>
+<h2 id="escenario">Escenario<a hidden class="anchor" aria-hidden="true" href="#escenario">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">ISP1 ─── ether1 (100 Mbps)  ┐
+</span></span><span class="line"><span class="cl">                              ├─── MikroTik ─── LAN (192.168.1.0/24)
+</span></span><span class="line"><span class="cl">ISP2 ─── ether2 (100 Mbps)  ┘
+</span></span></code></pre></div><table>
+  <thead>
+      <tr>
+          <th>Variable</th>
+          <th>ISP1</th>
+          <th>ISP2</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Interfaz</td>
+          <td><code>ether1</code></td>
+          <td><code>ether2</code></td>
+      </tr>
+      <tr>
+          <td>IP del router</td>
+          <td><code>203.0.113.2/30</code></td>
+          <td><code>198.51.100.2/30</code></td>
+      </tr>
+      <tr>
+          <td>Gateway</td>
+          <td><code>203.0.113.1</code></td>
+          <td><code>198.51.100.1</code></td>
+      </tr>
+  </tbody>
+</table>
+<p>Ajusta las IPs a tu entorno. El procedimiento es idéntico con direcciones DHCP — solo cambia cómo obtienes el gateway.</p>
+<hr>
+<h2 id="1-tablas-de-enrutamiento">1. Tablas de enrutamiento<a hidden class="anchor" aria-hidden="true" href="#1-tablas-de-enrutamiento">#</a></h2>
+<p>RouterOS v7 tiene soporte nativo para múltiples routing tables. Creamos una tabla por WAN:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/routing table
+</span></span><span class="line"><span class="cl">add name=wan1 fib
+</span></span><span class="line"><span class="cl">add name=wan2 fib
+</span></span></code></pre></div><hr>
+<h2 id="2-rutas-por-defecto">2. Rutas por defecto<a hidden class="anchor" aria-hidden="true" href="#2-rutas-por-defecto">#</a></h2>
+<p>Una ruta default en la tabla principal y una en cada tabla WAN:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip route
+</span></span><span class="line"><span class="cl">add dst-address=0.0.0.0/0 gateway=203.0.113.1  routing-table=main distance=1 check-gateway=ping comment=&#34;WAN1 default&#34;
+</span></span><span class="line"><span class="cl">add dst-address=0.0.0.0/0 gateway=198.51.100.1 routing-table=main distance=2 check-gateway=ping comment=&#34;WAN2 default (failover)&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add dst-address=0.0.0.0/0 gateway=203.0.113.1  routing-table=wan1 comment=&#34;WAN1 tabla propia&#34;
+</span></span><span class="line"><span class="cl">add dst-address=0.0.0.0/0 gateway=198.51.100.1 routing-table=wan2 comment=&#34;WAN2 tabla propia&#34;
+</span></span></code></pre></div><p>El <code>distance</code> en la tabla <code>main</code> da failover puro si no activas el balanceo. Con PCC reemplazamos este comportamiento para repartir tráfico entre ambos.</p>
+<blockquote>
+<p><code>check-gateway=ping</code> es crítico: RouterOS elimina la ruta de la tabla cuando el gateway no responde, lo que activa el failover automático sin necesidad de scripts adicionales.</p>
+</blockquote>
+<hr>
+<h2 id="3-mangle-marcado-de-conexiones-con-pcc">3. Mangle: marcado de conexiones con PCC<a hidden class="anchor" aria-hidden="true" href="#3-mangle-marcado-de-conexiones-con-pcc">#</a></h2>
+<p>PCC divide las conexiones en grupos según un hash de la tupla src/dst. Con <code>per-connection-classifier=both-addresses:2/0</code> y <code>/2/1</code> repartimos al 50%.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip firewall mangle
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- Tráfico que ya tiene marca de conexión: seguir por el mismo enlace ---
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-state=established,related \
+</span></span><span class="line"><span class="cl">    connection-mark=via-wan1 action=mark-routing new-routing-mark=wan1 \
+</span></span><span class="line"><span class="cl">    passthrough=no comment=&#34;Established: seguir por WAN1&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-state=established,related \
+</span></span><span class="line"><span class="cl">    connection-mark=via-wan2 action=mark-routing new-routing-mark=wan2 \
+</span></span><span class="line"><span class="cl">    passthrough=no comment=&#34;Established: seguir por WAN2&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- Nuevas conexiones: balanceo PCC ---
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-state=new in-interface=!ether1 in-interface=!ether2 \
+</span></span><span class="line"><span class="cl">    per-connection-classifier=both-addresses:2/0 \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan1 passthrough=yes \
+</span></span><span class="line"><span class="cl">    comment=&#34;PCC nuevo → WAN1&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-state=new in-interface=!ether1 in-interface=!ether2 \
+</span></span><span class="line"><span class="cl">    per-connection-classifier=both-addresses:2/1 \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan2 passthrough=yes \
+</span></span><span class="line"><span class="cl">    comment=&#34;PCC nuevo → WAN2&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-mark=via-wan1 \
+</span></span><span class="line"><span class="cl">    action=mark-routing new-routing-mark=wan1 passthrough=no \
+</span></span><span class="line"><span class="cl">    comment=&#34;Rutear conexiones WAN1&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=prerouting connection-mark=via-wan2 \
+</span></span><span class="line"><span class="cl">    action=mark-routing new-routing-mark=wan2 passthrough=no \
+</span></span><span class="line"><span class="cl">    comment=&#34;Rutear conexiones WAN2&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- Output (tráfico originado en el propio router) ---
+</span></span><span class="line"><span class="cl">add chain=output connection-state=established,related \
+</span></span><span class="line"><span class="cl">    connection-mark=via-wan1 action=mark-routing new-routing-mark=wan1 passthrough=no
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=output connection-state=established,related \
+</span></span><span class="line"><span class="cl">    connection-mark=via-wan2 action=mark-routing new-routing-mark=wan2 passthrough=no
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=output connection-state=new \
+</span></span><span class="line"><span class="cl">    per-connection-classifier=both-addresses:2/0 \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan1 passthrough=yes
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=output connection-state=new \
+</span></span><span class="line"><span class="cl">    per-connection-classifier=both-addresses:2/1 \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan2 passthrough=yes
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=output connection-mark=via-wan1 \
+</span></span><span class="line"><span class="cl">    action=mark-routing new-routing-mark=wan1 passthrough=no
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">add chain=output connection-mark=via-wan2 \
+</span></span><span class="line"><span class="cl">    action=mark-routing new-routing-mark=wan2 passthrough=no
+</span></span></code></pre></div><p><strong>Por qué <code>in-interface=!ether1</code> y <code>!ether2</code></strong>: el PCC solo debe aplicarse a tráfico que viene de la LAN. El tráfico que entra por las WAN ya tiene una conexión establecida y no debe ser reclasificado.</p>
+<hr>
+<h2 id="4-nat">4. NAT<a hidden class="anchor" aria-hidden="true" href="#4-nat">#</a></h2>
+<p>Masquerade diferenciado por interfaz de salida:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip firewall nat
+</span></span><span class="line"><span class="cl">add chain=srcnat out-interface=ether1 action=masquerade comment=&#34;SNAT WAN1&#34;
+</span></span><span class="line"><span class="cl">add chain=srcnat out-interface=ether2 action=masquerade comment=&#34;SNAT WAN2&#34;
+</span></span></code></pre></div><p>No uses <code>action=masquerade</code> global sin <code>out-interface</code> — aplicaría a tráfico interno también.</p>
+<hr>
+<h2 id="5-failover-automático-con-netwatch">5. Failover automático con Netwatch<a hidden class="anchor" aria-hidden="true" href="#5-failover-automático-con-netwatch">#</a></h2>
+<p><code>check-gateway=ping</code> en las rutas maneja el failover a nivel de routing table. Sin embargo, si el gateway responde pero no hay conectividad real hacia internet (corte del ISP aguas arriba), la ruta permanece activa. Netwatch resuelve esto verificando un host externo por cada enlace.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="o">/</span><span class="k">tool</span> <span class="n">netwatch</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">add</span> <span class="n">host</span><span class="o">=</span><span class="mf">8.8</span><span class="o">.</span><span class="mf">8.8</span> <span class="n">interval</span><span class="o">=</span><span class="mi">10</span><span class="n">s</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="n">s</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">up</span><span class="o">-</span><span class="n">script</span><span class="o">=</span><span class="s2">&#34;/ip route set [find comment=</span><span class="se">\&#34;</span><span class="s2">WAN1 default</span><span class="se">\&#34;</span><span class="s2">] distance=1&#34;</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">down</span><span class="o">-</span><span class="n">script</span><span class="o">=</span><span class="s2">&#34;/ip route set [find comment=</span><span class="se">\&#34;</span><span class="s2">WAN1 default</span><span class="se">\&#34;</span><span class="s2">] distance=10&#34;</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">comment</span><span class="o">=</span><span class="s2">&#34;Monitor WAN1 via 8.8.8.8&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">add</span> <span class="n">host</span><span class="o">=</span><span class="mf">1.1</span><span class="o">.</span><span class="mf">1.1</span> <span class="n">interval</span><span class="o">=</span><span class="mi">10</span><span class="n">s</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="n">s</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">up</span><span class="o">-</span><span class="n">script</span><span class="o">=</span><span class="s2">&#34;/ip route set [find comment=</span><span class="se">\&#34;</span><span class="s2">WAN2 default</span><span class="se">\&#34;</span><span class="s2">] distance=2&#34;</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">down</span><span class="o">-</span><span class="n">script</span><span class="o">=</span><span class="s2">&#34;/ip route set [find comment=</span><span class="se">\&#34;</span><span class="s2">WAN2 default</span><span class="se">\&#34;</span><span class="s2">] distance=10&#34;</span> \
+</span></span><span class="line"><span class="cl">    <span class="n">comment</span><span class="o">=</span><span class="s2">&#34;Monitor WAN2 via 1.1.1.1&#34;</span>
+</span></span></code></pre></div><p>Cuando WAN1 cae, su distancia sube a 10 y todo el tráfico sale por WAN2 (distancia 2). Cuando vuelve, la distancia regresa a 1 y el balanceo se reanuda.</p>
+<blockquote>
+<p>Usa hosts de monitoreo distintos por WAN para evitar falsos positivos. Si usas el mismo host (8.8.8.8) para ambas, un bloqueo puntual de ese IP derribaría los dos enlaces simultáneamente en tu tabla de rutas.</p>
+</blockquote>
+<hr>
+<h2 id="6-tráfico-que-no-debe-balancearse">6. Tráfico que NO debe balancearse<a hidden class="anchor" aria-hidden="true" href="#6-tráfico-que-no-debe-balancearse">#</a></h2>
+<p>Algunos servicios rompen si la conexión migra de IP pública. Fíjalos a un enlace específico antes de las reglas PCC:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip firewall mangle
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># VPN saliente siempre por WAN1
+</span></span><span class="line"><span class="cl">add chain=prerouting dst-port=1194 protocol=udp \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan1 passthrough=yes \
+</span></span><span class="line"><span class="cl">    comment=&#34;OpenVPN fijo a WAN1&#34;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Tráfico hacia una red corporativa específica siempre por WAN2
+</span></span><span class="line"><span class="cl">add chain=prerouting dst-address=10.0.0.0/8 \
+</span></span><span class="line"><span class="cl">    action=mark-connection new-connection-mark=via-wan2 passthrough=yes \
+</span></span><span class="line"><span class="cl">    comment=&#34;Red corporativa fija a WAN2&#34;
+</span></span></code></pre></div><p>Coloca estas reglas <strong>antes</strong> de las reglas PCC en la cadena <code>prerouting</code>. El orden en mangle es secuencial.</p>
+<hr>
+<h2 id="7-verificación">7. Verificación<a hidden class="anchor" aria-hidden="true" href="#7-verificación">#</a></h2>
+<p><strong>Confirmar que ambas rutas están activas:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip route print where dst-address=0.0.0.0/0
+</span></span></code></pre></div><p>Debes ver ambas rutas con la flag <code>A</code> (active). Si una cae por <code>check-gateway</code>, aparecerá sin <code>A</code>.</p>
+<p><strong>Ver marcas de conexión activas:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip firewall connection print where connection-mark~&#34;via-wan&#34;
+</span></span></code></pre></div><p><strong>Verificar distribución de tráfico:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/interface monitor-traffic ether1,ether2 interval=1
+</span></span></code></pre></div><p><strong>Simular caída de WAN1:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip route set [find comment=&#34;WAN1 default&#34;] distance=10
+</span></span></code></pre></div><p>Verifica que el tráfico migre a ether2, luego restaura:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">/ip route set [find comment=&#34;WAN1 default&#34;] distance=1
+</span></span></code></pre></div><hr>
+<h2 id="consideraciones-de-producción">Consideraciones de producción<a hidden class="anchor" aria-hidden="true" href="#consideraciones-de-producción">#</a></h2>
+<p><strong>Sesiones TCP largas</strong>: PCC garantiza que una misma conexión siempre use el mismo enlace, pero si el enlace cae mientras la conexión está activa, esa sesión TCP muere. No hay solución a esto sin ECMP a nivel de sesión o un proxy intermedio. El cliente simplemente reconectará.</p>
+<p><strong>Links asimétricos</strong>: Si WAN1 tiene 100 Mbps y WAN2 tiene 50 Mbps, ajusta el PCC para repartir en proporción 2:1:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># Divide en 3 grupos: 0 y 1 van a WAN1, 2 va a WAN2
+</span></span><span class="line"><span class="cl">per-connection-classifier=both-addresses:3/0   → WAN1
+</span></span><span class="line"><span class="cl">per-connection-classifier=both-addresses:3/1   → WAN1
+</span></span><span class="line"><span class="cl">per-connection-classifier=both-addresses:3/2   → WAN2
+</span></span></code></pre></div><p><strong>IPv6</strong>: Si tus ISPs entregan prefijos IPv6, replica la lógica en <code>/ipv6 firewall mangle</code> y <code>/ipv6 route</code>. PCC funciona igual sobre IPv6.</p>
+<p><strong>Conexiones entrantes (servidores publicados)</strong>: el balanceo aplica solo a tráfico saliente. Si publicas servicios, usa DNS con TTL bajo apuntando a una sola IP pública, o un proveedor de DNS con failover (Cloudflare, Route 53) que cambie el registro cuando detecte que la IP no responde.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/mikrotik/">Mikrotik</a></li>
+      <li><a href="http://localhost:1313/tags/routeros/">Routeros</a></li>
+      <li><a href="http://localhost:1313/tags/wan/">Wan</a></li>
+      <li><a href="http://localhost:1313/tags/balanceo/">Balanceo</a></li>
+      <li><a href="http://localhost:1313/tags/firewall/">Firewall</a></li>
+      <li><a href="http://localhost:1313/tags/mangle/">Mangle</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/vyos-primera-configuracion/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/opnsense-vlans-firewall/">
+    <span class="title">Next »</span>
+    <br>
+    <span>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">netlog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

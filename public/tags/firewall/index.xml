@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Firewall on netlog</title>
+    <link>http://localhost:1313/tags/firewall/</link>
+    <description>Recent content in Firewall on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/firewall/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>Guía práctica para dejar un router VyOS funcional desde cero: NAT masquerade, zonas de firewall, rutas estáticas y subinterfaces 802.1Q.</description>
+    </item>
+    <item>
+      <title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</title>
+      <link>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</guid>
+      <description>Configuración completa de balanceo de carga y failover sobre dos enlaces WAN en MikroTik RouterOS v7 usando PCC, mangle, routing tables y netwatch.</description>
+    </item>
+    <item>
+      <title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</title>
+      <link>http://localhost:1313/posts/opnsense-vlans-firewall/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/opnsense-vlans-firewall/</guid>
+      <description>Configuración completa de 5 VLANs en OPNsense: asignación de IPs, aislamiento inter-VLAN vía firewall, permitir internet bloqueando RFC 1918, y hardening del perímetro.</description>
+    </item>
+  </channel>
+</rss>

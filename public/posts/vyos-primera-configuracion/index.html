@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs | netlog</title>
+<meta name="keywords" content="vyos, router, nat, firewall, vlan, static-route, linux">
+<meta name="description" content="Guía práctica para dejar un router VyOS funcional desde cero: NAT masquerade, zonas de firewall, rutas estáticas y subinterfaces 802.1Q.">
+<meta name="author" content="Francisco Valladolid">
+<link rel="canonical" href="http://localhost:1313/posts/vyos-primera-configuracion/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.199042e659bc7245f5609d333d6c044eb554a0640849bb874e1dff8eb0f57209.css" integrity="sha256-GZBC5lm8ckX1YJ0zPWwETrVUoGQISbuHTh3/jrD1cgk=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/vyos-primera-configuracion/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="netlog (Alt + H)">netlog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs
+    </h1>
+    <div class="post-description">
+      Guía práctica para dejar un router VyOS funcional desde cero: NAT masquerade, zonas de firewall, rutas estáticas y subinterfaces 802.1Q.
+    </div>
+    <div class="post-meta"><span title='2026-04-10 00:00:00 +0000 UTC'>April 10, 2026</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>Francisco Valladolid</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>VyOS es un router/firewall de código abierto basado en Debian. A diferencia de equipos como MikroTik o Cisco, toda la configuración vive en un árbol jerárquico que se edita en <strong>modo de configuración</strong> y se confirma con <code>commit</code>. Este modelo — inspirado en Junos — hace que los cambios sean atómicos y reversibles, lo cual es una ventaja real en producción.</p>
+<p>Este post cubre los cuatro bloques fundamentales para dejar un router VyOS operativo: NAT, Firewall, Rutas Estáticas y VLANs.</p>
+<h2 id="escenario-de-referencia">Escenario de referencia<a hidden class="anchor" aria-hidden="true" href="#escenario-de-referencia">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Internet
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl">  eth0  (WAN — IP pública o DHCP del ISP)
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl"> [VyOS]
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl">  eth1  (LAN — 192.168.1.1/24)
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl">  eth1.10  VLAN 10 — Servidores  (10.10.10.1/24)
+</span></span><span class="line"><span class="cl">  eth1.20  VLAN 20 — Usuarios    (10.10.20.1/24)
+</span></span></code></pre></div><hr>
+<h2 id="1-configuración-inicial-de-interfaces">1. Configuración inicial de interfaces<a hidden class="anchor" aria-hidden="true" href="#1-configuración-inicial-de-interfaces">#</a></h2>
+<p>Entrar al modo de configuración es siempre el primer paso:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">configure
+</span></span></code></pre></div><p>Asignar IPs a las interfaces:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set interfaces ethernet eth0 description &#39;WAN&#39;
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth0 address dhcp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth1 description &#39;LAN&#39;
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth1 address &#39;192.168.1.1/24&#39;
+</span></span></code></pre></div><p>Confirmar y guardar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><blockquote>
+<p><strong>Tip:</strong> <code>compare</code> antes de <code>commit</code> muestra exactamente qué cambiará. Útil para auditar en sesiones largas.</p>
+</blockquote>
+<hr>
+<h2 id="2-nat--masquerade-hacia-wan">2. NAT — Masquerade hacia WAN<a hidden class="anchor" aria-hidden="true" href="#2-nat--masquerade-hacia-wan">#</a></h2>
+<p>VyOS implementa NAT como reglas numeradas. Para salida a internet desde cualquier subred interna:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set nat source rule 10 description &#39;LAN a Internet&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 10 outbound-interface name &#39;eth0&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 10 source address &#39;192.168.0.0/16&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 10 translation address masquerade
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>El bloque <code>192.168.0.0/16</code> cubre la LAN y las VLANs que se agregarán más adelante. Si preferís ser más estricto, podés crear una regla por subred.</p>
+<p>Verificar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show nat <span class="nb">source</span> rules
+</span></span><span class="line"><span class="cl">show nat <span class="nb">source</span> translations
+</span></span></code></pre></div><hr>
+<h2 id="3-firewall-por-zonas">3. Firewall por zonas<a hidden class="anchor" aria-hidden="true" href="#3-firewall-por-zonas">#</a></h2>
+<p>VyOS permite un modelo de firewall <strong>basado en zonas</strong>, donde cada interfaz pertenece a una zona y se define la política entre pares de zonas. Es más ordenado que aplicar reglas sueltas por interfaz.</p>
+<h3 id="definir-zonas">Definir zonas<a hidden class="anchor" aria-hidden="true" href="#definir-zonas">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set firewall zone WAN interface eth0
+</span></span><span class="line"><span class="cl">set firewall zone LAN interface eth1
+</span></span><span class="line"><span class="cl">set firewall zone LOCAL local-zone
+</span></span></code></pre></div><p><code>local-zone</code> es el propio router (tráfico que termina o sale de VyOS mismo).</p>
+<h3 id="política-wan--local-acceso-al-router-desde-internet">Política WAN → LOCAL (acceso al router desde internet)<a hidden class="anchor" aria-hidden="true" href="#política-wan--local-acceso-al-router-desde-internet">#</a></h3>
+<p>Por defecto denegar todo; permitir solo ICMP y respuestas de conexiones establecidas:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL default-action drop
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL rule 10 action accept
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL rule 10 state established
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL rule 10 state related
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL rule 20 action accept
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LOCAL rule 20 protocol icmp
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set firewall zone LOCAL from WAN firewall name WAN-TO-LOCAL
+</span></span></code></pre></div><h3 id="política-wan--lan-tráfico-entrante-hacia-la-red">Política WAN → LAN (tráfico entrante hacia la red)<a hidden class="anchor" aria-hidden="true" href="#política-wan--lan-tráfico-entrante-hacia-la-red">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LAN default-action drop
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LAN rule 10 action accept
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LAN rule 10 state established
+</span></span><span class="line"><span class="cl">set firewall ipv4 name WAN-TO-LAN rule 10 state related
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set firewall zone LAN from WAN firewall name WAN-TO-LAN
+</span></span></code></pre></div><h3 id="política-lan--wan-tráfico-saliente-de-la-lan">Política LAN → WAN (tráfico saliente de la LAN)<a hidden class="anchor" aria-hidden="true" href="#política-lan--wan-tráfico-saliente-de-la-lan">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set firewall ipv4 name LAN-TO-WAN default-action accept
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set firewall zone WAN from LAN firewall name LAN-TO-WAN
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Verificar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show firewall zones
+</span></span><span class="line"><span class="cl">show firewall ipv4 name WAN-TO-LOCAL statistics
+</span></span></code></pre></div><hr>
+<h2 id="4-rutas-estáticas">4. Rutas estáticas<a hidden class="anchor" aria-hidden="true" href="#4-rutas-estáticas">#</a></h2>
+<p>Para redes que no son directamente conectadas ni aprendidas por un protocolo de ruteo dinámico.</p>
+<h3 id="ruta-por-defecto-manual-si-eth0-no-usa-dhcp">Ruta por defecto manual (si eth0 no usa DHCP)<a hidden class="anchor" aria-hidden="true" href="#ruta-por-defecto-manual-si-eth0-no-usa-dhcp">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set protocols static route 0.0.0.0/0 next-hop 203.0.113.1
+</span></span></code></pre></div><h3 id="ruta-hacia-una-red-remota-detrás-de-otro-router">Ruta hacia una red remota detrás de otro router<a hidden class="anchor" aria-hidden="true" href="#ruta-hacia-una-red-remota-detrás-de-otro-router">#</a></h3>
+<p>Supongamos que <code>192.168.100.0/24</code> está detrás de un router en <code>192.168.1.254</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set protocols static route 192.168.100.0/24 next-hop 192.168.1.254
+</span></span></code></pre></div><h3 id="ruta-de-descarte-blackhole">Ruta de descarte (blackhole)<a hidden class="anchor" aria-hidden="true" href="#ruta-de-descarte-blackhole">#</a></h3>
+<p>Útil para agregar supernets y evitar loops de ruteo:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set protocols static route 10.10.0.0/16 blackhole distance 254
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Verificar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show ip route
+</span></span><span class="line"><span class="cl">show ip route static
+</span></span></code></pre></div><hr>
+<h2 id="5-vlans--subinterfaces-8021q">5. VLANs — Subinterfaces 802.1Q<a hidden class="anchor" aria-hidden="true" href="#5-vlans--subinterfaces-8021q">#</a></h2>
+<p>VyOS crea VLANs como subinterfaces <code>ethn.vlan-id</code> sobre la interfaz troncal.</p>
+<h3 id="crear-subinterfaces">Crear subinterfaces<a hidden class="anchor" aria-hidden="true" href="#crear-subinterfaces">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set interfaces ethernet eth1 vif 10 description &#39;Servidores&#39;
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth1 vif 10 address &#39;10.10.10.1/24&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth1 vif 20 description &#39;Usuarios&#39;
+</span></span><span class="line"><span class="cl">set interfaces ethernet eth1 vif 20 address &#39;10.10.20.1/24&#39;
+</span></span></code></pre></div><h3 id="agregar-las-vlans-a-las-zonas-de-firewall">Agregar las VLANs a las zonas de firewall<a hidden class="anchor" aria-hidden="true" href="#agregar-las-vlans-a-las-zonas-de-firewall">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set firewall zone LAN interface eth1.10
+</span></span><span class="line"><span class="cl">set firewall zone LAN interface eth1.20
+</span></span></code></pre></div><h3 id="extender-el-nat-para-las-nuevas-subredes">Extender el NAT para las nuevas subredes<a hidden class="anchor" aria-hidden="true" href="#extender-el-nat-para-las-nuevas-subredes">#</a></h3>
+<p>La regla de NAT ya usa <code>192.168.0.0/16</code>, así que las subredes <code>10.10.x.x</code> quedan fuera. Agregar una regla adicional:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set nat source rule 20 description &#39;VLANs a Internet&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 20 outbound-interface name &#39;eth0&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 20 source address &#39;10.10.0.0/16&#39;
+</span></span><span class="line"><span class="cl">set nat source rule 20 translation address masquerade
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Verificar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show interfaces
+</span></span><span class="line"><span class="cl">show interfaces ethernet eth1 vif
+</span></span><span class="line"><span class="cl">ping 10.10.10.1 from-address 10.10.20.1
+</span></span></code></pre></div><hr>
+<h2 id="resumen-de-comandos-útiles">Resumen de comandos útiles<a hidden class="anchor" aria-hidden="true" href="#resumen-de-comandos-útiles">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Tarea</th>
+          <th>Comando</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Ver configuración activa</td>
+          <td><code>show configuration</code></td>
+      </tr>
+      <tr>
+          <td>Ver diff sin hacer commit</td>
+          <td><code>compare</code></td>
+      </tr>
+      <tr>
+          <td>Revertir cambios sin commit</td>
+          <td><code>discard</code></td>
+      </tr>
+      <tr>
+          <td>Rollback al commit anterior</td>
+          <td><code>rollback 1</code> (en modo config)</td>
+      </tr>
+      <tr>
+          <td>Ver tabla de ruteo</td>
+          <td><code>show ip route</code></td>
+      </tr>
+      <tr>
+          <td>Ver traducciones NAT activas</td>
+          <td><code>show nat source translations</code></td>
+      </tr>
+      <tr>
+          <td>Ver logs del firewall</td>
+          <td><code>show log firewall</code></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="próximos-pasos">Próximos pasos<a hidden class="anchor" aria-hidden="true" href="#próximos-pasos">#</a></h2>
+<p>Con esta base podés avanzar hacia:</p>
+<ul>
+<li><strong>DHCP Server</strong> por VLAN (<code>set service dhcp-server</code>)</li>
+<li><strong>DNS Forwarder</strong> local (<code>set service dns forwarding</code>)</li>
+<li><strong>BGP / OSPF</strong> con el stack <code>set protocols bgp</code> o <code>set protocols ospf</code></li>
+<li><strong>WireGuard</strong> o <strong>IPsec</strong> para acceso remoto</li>
+</ul>
+<p>VyOS tiene la ventaja de que la curva de aprendizaje inicial es confusa, pero una vez que entiendes el modelo de <code>configure → set → commit → save</code>, la configuración escala de forma muy limpia.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/vyos/">Vyos</a></li>
+      <li><a href="http://localhost:1313/tags/router/">Router</a></li>
+      <li><a href="http://localhost:1313/tags/nat/">Nat</a></li>
+      <li><a href="http://localhost:1313/tags/firewall/">Firewall</a></li>
+      <li><a href="http://localhost:1313/tags/vlan/">Vlan</a></li>
+      <li><a href="http://localhost:1313/tags/static-route/">Static-Route</a></li>
+      <li><a href="http://localhost:1313/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/vyos-dhcp-server/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/mikrotik-dual-wan-balanceo/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">netlog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

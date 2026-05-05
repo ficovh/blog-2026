@@ -1,0 +1,23 @@
+{{ define "main" }}
+<article>
+  <header class="page-header">
+    <div class="about-profile">
+      {{ if .Params.photo }}
+        <img class="about-photo" src="{{ .Params.photo }}" alt="{{ .Site.Params.author | default .Title }}">
+      {{ else }}
+        <div class="about-photo about-photo--placeholder" aria-hidden="true">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="30" r="16" fill="currentColor" opacity="0.35"/>
+            <ellipse cx="40" cy="72" rx="26" ry="18" fill="currentColor" opacity="0.25"/>
+          </svg>
+        </div>
+      {{ end }}
+    </div>
+    <h1 class="page-title">{{ .Title }}</h1>
+  </header>
+
+  <div class="post-content">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

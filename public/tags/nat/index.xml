@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Nat on netlog</title>
+    <link>http://localhost:1313/tags/nat/</link>
+    <description>Recent content in Nat on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/nat/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>Guía práctica para dejar un router VyOS funcional desde cero: NAT masquerade, zonas de firewall, rutas estáticas y subinterfaces 802.1Q.</description>
+    </item>
+  </channel>
+</rss>

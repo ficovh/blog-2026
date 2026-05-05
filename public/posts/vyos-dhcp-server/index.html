@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos | netlog</title>
+<meta name="keywords" content="vyos, dhcp, router, vlan, networking, linux">
+<meta name="description" content="Guía práctica para configurar el servidor DHCP en VyOS: subredes, opciones avanzadas, reservas estáticas y troubleshooting.">
+<meta name="author" content="Francisco Valladolid">
+<link rel="canonical" href="http://localhost:1313/posts/vyos-dhcp-server/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.199042e659bc7245f5609d333d6c044eb554a0640849bb874e1dff8eb0f57209.css" integrity="sha256-GZBC5lm8ckX1YJ0zPWwETrVUoGQISbuHTh3/jrD1cgk=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/vyos-dhcp-server/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="netlog (Alt + H)">netlog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos
+    </h1>
+    <div class="post-description">
+      Guía práctica para configurar el servidor DHCP en VyOS: subredes, opciones avanzadas, reservas estáticas y troubleshooting.
+    </div>
+    <div class="post-meta"><span title='2026-04-11 00:00:00 +0000 UTC'>April 11, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>Francisco Valladolid</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>VyOS incluye un servidor DHCP completo basado en ISC DHCP. La configuración vive bajo <code>set service dhcp-server</code> y sigue el mismo modelo jerárquico que el resto del sistema: se edita en modo configuración, se valida con <code>commit</code> y se persiste con <code>save</code>.</p>
+<p>Este post parte del escenario definido en <a href="/posts/vyos-primera-configuracion/">VyOS: Primera Configuración</a> y agrega DHCP para la LAN principal y dos VLANs.</p>
+<h2 id="escenario-de-referencia">Escenario de referencia<a hidden class="anchor" aria-hidden="true" href="#escenario-de-referencia">#</a></h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Internet
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl">  eth0  (WAN)
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl"> [VyOS]
+</span></span><span class="line"><span class="cl">    │
+</span></span><span class="line"><span class="cl">  eth1          LAN principal  — 192.168.1.1/24
+</span></span><span class="line"><span class="cl">  eth1.10       VLAN 10 Servidores — 10.10.10.1/24
+</span></span><span class="line"><span class="cl">  eth1.20       VLAN 20 Usuarios   — 10.10.20.1/24
+</span></span></code></pre></div><p>Cada segmento necesita su propio servidor DHCP, porque VyOS actúa como gateway de cada red.</p>
+<hr>
+<h2 id="1-dhcp-para-la-lan-principal">1. DHCP para la LAN principal<a hidden class="anchor" aria-hidden="true" href="#1-dhcp-para-la-lan-principal">#</a></h2>
+<p>El bloque mínimo de configuración requiere:</p>
+<ul>
+<li>Un nombre de <strong>shared-network</strong> (agrupa subredes bajo un mismo servidor)</li>
+<li>La <strong>subred</strong> con su máscara</li>
+<li>El <strong>rango</strong> de IPs a asignar</li>
+<li>El <strong>router</strong> (gateway que se entrega al cliente)</li>
+<li>El <strong>tiempo de lease</strong></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">configure
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 start &#39;192.168.1.100&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 stop  &#39;192.168.1.200&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 default-router &#39;192.168.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 lease &#39;86400&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>El lease de <code>86400</code> segundos equivale a 24 horas. Para redes de oficina o hogar es un valor razonable; para redes de invitados con alta rotación, algo entre <code>3600</code> y <code>7200</code> es más adecuado.</p>
+<h3 id="agregar-servidores-dns">Agregar servidores DNS<a hidden class="anchor" aria-hidden="true" href="#agregar-servidores-dns">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 name-server &#39;1.1.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 name-server &#39;8.8.8.8&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Se pueden declarar múltiples <code>name-server</code>. Los clientes los reciben en el orden en que se configuran.</p>
+<h3 id="agregar-sufijo-de-dominio">Agregar sufijo de dominio<a hidden class="anchor" aria-hidden="true" href="#agregar-sufijo-de-dominio">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 domain-name &#39;corp.local&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Con esto los clientes resuelven nombres cortos (<code>server1</code>) como <code>server1.corp.local</code>.</p>
+<hr>
+<h2 id="2-dhcp-para-las-vlans">2. DHCP para las VLANs<a hidden class="anchor" aria-hidden="true" href="#2-dhcp-para-las-vlans">#</a></h2>
+<p>Cada VLAN es una subred independiente. Se pueden agrupar bajo el mismo <code>shared-network</code> o en redes separadas. Usar redes separadas por VLAN es más claro y facilita el troubleshooting.</p>
+<h3 id="vlan-10--servidores">VLAN 10 — Servidores<a hidden class="anchor" aria-hidden="true" href="#vlan-10--servidores">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 range 0 start &#39;10.10.10.10&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 range 0 stop  &#39;10.10.10.50&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 default-router &#39;10.10.10.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 lease &#39;86400&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 name-server &#39;10.10.10.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 domain-name &#39;srv.corp.local&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>El rango <code>10.10.10.10 – 10.10.10.50</code> deja el espacio <code>10.10.10.51 – 10.10.10.254</code> libre para asignaciones estáticas o equipos configurados a mano.</p>
+<h3 id="vlan-20--usuarios">VLAN 20 — Usuarios<a hidden class="anchor" aria-hidden="true" href="#vlan-20--usuarios">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 range 0 start &#39;10.10.20.50&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 range 0 stop  &#39;10.10.20.200&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 default-router &#39;10.10.20.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 lease &#39;28800&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 name-server &#39;1.1.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 name-server &#39;8.8.8.8&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 domain-name &#39;corp.local&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>Lease de <code>28800</code> (8 horas): apropiado para estaciones de trabajo en jornada laboral.</p>
+<hr>
+<h2 id="3-reservas-estáticas-static-mappings">3. Reservas estáticas (static mappings)<a hidden class="anchor" aria-hidden="true" href="#3-reservas-estáticas-static-mappings">#</a></h2>
+<p>Una reserva vincula una MAC address a una IP fija. El cliente sigue usando DHCP pero siempre recibe la misma dirección. Esto es preferible a configurar la IP directamente en el equipo porque la gestión queda centralizada en el router.</p>
+<h3 id="reserva-para-un-servidor-en-vlan-10">Reserva para un servidor en VLAN 10<a hidden class="anchor" aria-hidden="true" href="#reserva-para-un-servidor-en-vlan-10">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-nfs mac &#39;aa:bb:cc:dd:ee:01&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-nfs ip-address &#39;10.10.10.100&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>El nombre <code>srv-nfs</code> es una etiqueta local; no tiene que coincidir con el hostname del equipo, pero ayuda a identificar la reserva.</p>
+<h3 id="reserva-con-opciones-adicionales">Reserva con opciones adicionales<a hidden class="anchor" aria-hidden="true" href="#reserva-con-opciones-adicionales">#</a></h3>
+<p>Es posible sobreescribir DNS y gateway por reserva individual. Útil para equipos que deben usar un DNS interno diferente:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-dc mac &#39;aa:bb:cc:dd:ee:02&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-dc ip-address &#39;10.10.10.101&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-dc name-server &#39;10.10.10.101&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><blockquote>
+<p><strong>Nota:</strong> La IP de una reserva puede estar dentro o fuera del rango dinámico. Fuera del rango es lo más seguro para evitar conflictos si el pool se agota.</p>
+</blockquote>
+<hr>
+<h2 id="4-opciones-dhcp-avanzadas">4. Opciones DHCP avanzadas<a hidden class="anchor" aria-hidden="true" href="#4-opciones-dhcp-avanzadas">#</a></h2>
+<h3 id="opciones-personalizadas-option-43-66-67-etc">Opciones personalizadas (option 43, 66, 67, etc.)<a hidden class="anchor" aria-hidden="true" href="#opciones-personalizadas-option-43-66-67-etc">#</a></h3>
+<p>VyOS permite inyectar opciones DHCP arbitrarias por su número. Por ejemplo, para entregar la IP de un servidor TFTP (opción 66) a teléfonos IP:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 bootfile-server &#39;10.10.10.5&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 bootfile-name &#39;firmware.bin&#39;
+</span></span></code></pre></div><h3 id="múltiples-rangos-en-la-misma-subred">Múltiples rangos en la misma subred<a hidden class="anchor" aria-hidden="true" href="#múltiples-rangos-en-la-misma-subred">#</a></h3>
+<p>Si se quiere reservar un bloque intermedio (por ejemplo, para impresoras con IP fija entre <code>.50</code> y <code>.99</code>):</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 start &#39;192.168.1.100&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 stop  &#39;192.168.1.149&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 1 start &#39;192.168.1.200&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 1 stop  &#39;192.168.1.250&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><p>El bloque <code>192.168.1.150 – 192.168.1.199</code> queda libre para asignación manual.</p>
+<hr>
+<h2 id="5-verificación-y-troubleshooting">5. Verificación y troubleshooting<a hidden class="anchor" aria-hidden="true" href="#5-verificación-y-troubleshooting">#</a></h2>
+<h3 id="ver-leases-activos">Ver leases activos<a hidden class="anchor" aria-hidden="true" href="#ver-leases-activos">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show dhcp server leases
+</span></span></code></pre></div><p>Muestra IP asignada, MAC, hostname del cliente y tiempo de expiración.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show dhcp server leases pool VLAN20
+</span></span></code></pre></div><p>Filtra por pool específico.</p>
+<h3 id="ver-estadísticas-del-servidor">Ver estadísticas del servidor<a hidden class="anchor" aria-hidden="true" href="#ver-estadísticas-del-servidor">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show dhcp server statistics
+</span></span></code></pre></div><p>Útil para detectar pools exhaustos (<code>pool full</code>) antes de que los usuarios reporten problemas.</p>
+<h3 id="ver-la-configuración-actual">Ver la configuración actual<a hidden class="anchor" aria-hidden="true" href="#ver-la-configuración-actual">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show service dhcp-server
+</span></span></code></pre></div><h3 id="liberar-un-lease-manualmente">Liberar un lease manualmente<a hidden class="anchor" aria-hidden="true" href="#liberar-un-lease-manualmente">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">clear dhcp server lease ip 192.168.1.105
+</span></span></code></pre></div><p>Útil cuando un equipo cambió de MAC y el lease anterior todavía está activo.</p>
+<h3 id="verificar-desde-el-cliente-linux">Verificar desde el cliente (Linux)<a hidden class="anchor" aria-hidden="true" href="#verificar-desde-el-cliente-linux">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Renovar lease</span>
+</span></span><span class="line"><span class="cl">sudo dhclient -r eth0 <span class="o">&amp;&amp;</span> sudo dhclient eth0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Ver qué IP y opciones se recibieron</span>
+</span></span><span class="line"><span class="cl">ip addr show eth0
+</span></span><span class="line"><span class="cl">cat /etc/resolv.conf
+</span></span></code></pre></div><h3 id="logs-del-servidor-dhcp">Logs del servidor DHCP<a hidden class="anchor" aria-hidden="true" href="#logs-del-servidor-dhcp">#</a></h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">show log dhcp server
+</span></span></code></pre></div><p>O en tiempo real:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">monitor log <span class="p">|</span> match DHCP
+</span></span></code></pre></div><hr>
+<h2 id="6-ejemplo-completo--configuración-final">6. Ejemplo completo — configuración final<a hidden class="anchor" aria-hidden="true" href="#6-ejemplo-completo--configuración-final">#</a></h2>
+<p>Resumen de todo lo anterior en un bloque limpio para copiar y adaptar:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">configure
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- LAN principal ---
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 start &#39;192.168.1.100&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 range 0 stop  &#39;192.168.1.200&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 default-router &#39;192.168.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 name-server &#39;1.1.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 name-server &#39;8.8.8.8&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 domain-name &#39;corp.local&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name LAN subnet 192.168.1.0/24 lease &#39;86400&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- VLAN 10 Servidores ---
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 range 0 start &#39;10.10.10.10&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 range 0 stop  &#39;10.10.10.50&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 default-router &#39;10.10.10.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 name-server &#39;10.10.10.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 domain-name &#39;srv.corp.local&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 lease &#39;86400&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># Reservas VLAN 10
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-nfs mac &#39;aa:bb:cc:dd:ee:01&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-nfs ip-address &#39;10.10.10.100&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-dc mac &#39;aa:bb:cc:dd:ee:02&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN10 subnet 10.10.10.0/24 static-mapping srv-dc ip-address &#39;10.10.10.101&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"># --- VLAN 20 Usuarios ---
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 range 0 start &#39;10.10.20.50&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 range 0 stop  &#39;10.10.20.200&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 default-router &#39;10.10.20.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 name-server &#39;1.1.1.1&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 name-server &#39;8.8.8.8&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 domain-name &#39;corp.local&#39;
+</span></span><span class="line"><span class="cl">set service dhcp-server shared-network-name VLAN20 subnet 10.10.20.0/24 lease &#39;28800&#39;
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">commit
+</span></span><span class="line"><span class="cl">save
+</span></span></code></pre></div><hr>
+<h2 id="resumen-de-comandos-útiles">Resumen de comandos útiles<a hidden class="anchor" aria-hidden="true" href="#resumen-de-comandos-útiles">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Tarea</th>
+          <th>Comando</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Ver todos los leases</td>
+          <td><code>show dhcp server leases</code></td>
+      </tr>
+      <tr>
+          <td>Ver leases de un pool</td>
+          <td><code>show dhcp server leases pool VLAN10</code></td>
+      </tr>
+      <tr>
+          <td>Ver estadísticas</td>
+          <td><code>show dhcp server statistics</code></td>
+      </tr>
+      <tr>
+          <td>Ver configuración</td>
+          <td><code>show service dhcp-server</code></td>
+      </tr>
+      <tr>
+          <td>Liberar lease por IP</td>
+          <td><code>clear dhcp server lease ip &lt;IP&gt;</code></td>
+      </tr>
+      <tr>
+          <td>Ver logs en tiempo real</td>
+          <td><code>monitor log | match DHCP</code></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="próximos-pasos">Próximos pasos<a hidden class="anchor" aria-hidden="true" href="#próximos-pasos">#</a></h2>
+<p>Con DHCP en funcionamiento, los siguientes pasos naturales son:</p>
+<ul>
+<li><strong>DNS Forwarder local</strong> (<code>set service dns forwarding</code>) para que VyOS resuelva nombres internos y reenvíe el resto</li>
+<li><strong>DHCP Relay</strong> si tienes switches de capa 3 y los servidores DHCP están en otra subred</li>
+<li><strong>IPv6 con DHCPv6</strong> (<code>set service dhcpv6-server</code>) o SLAAC para dual-stack</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/vyos/">Vyos</a></li>
+      <li><a href="http://localhost:1313/tags/dhcp/">Dhcp</a></li>
+      <li><a href="http://localhost:1313/tags/router/">Router</a></li>
+      <li><a href="http://localhost:1313/tags/vlan/">Vlan</a></li>
+      <li><a href="http://localhost:1313/tags/networking/">Networking</a></li>
+      <li><a href="http://localhost:1313/tags/linux/">Linux</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/vyos-primera-configuracion/">
+    <span class="title">Next »</span>
+    <br>
+    <span>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">netlog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

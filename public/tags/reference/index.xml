@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Reference on netlog</title>
+    <link>http://localhost:1313/tags/reference/</link>
+    <description>Recent content in Reference on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 07 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/reference/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Subnetting: From First Principles to VLSM</title>
+      <link>http://localhost:1313/posts/subnetting-reference/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/subnetting-reference/</guid>
+      <description>A practical subnetting guide covering binary math, CIDR notation, VLSM, and common exam-style calculations — written for engineers who want to understand the why.</description>
+    </item>
+    <item>
+      <title>OSPF LSA Types: A Field Reference</title>
+      <link>http://localhost:1313/posts/ospf-lsa-types/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/ospf-lsa-types/</guid>
+      <description>A concise reference for OSPF LSA types 1–7, what they carry, and which routers originate them.</description>
+    </item>
+  </channel>
+</rss>

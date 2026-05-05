@@ -1,0 +1,20 @@
+<header class="site-header">
+  <div class="site-wrapper">
+    <div class="header-inner">
+      <div class="site-brand">
+        <a class="site-name" href="{{ "/" | relURL }}"><span>~/</span>{{ site.Title }}</a>
+        <span class="site-subtitle">{{ site.Params.subtitle }}</span>
+      </div>
+      <nav class="site-nav">
+        <a href="{{ "/" | relURL }}">posts</a>
+        <a href="{{ "/tags" | relURL }}">tags</a>
+        <a href="{{ "/gallery" | relURL }}">gallery</a>
+        <a href="{{ "/about" | relURL }}">about</a>
+        {{ with site.Params.github }}<a href="{{ . }}" target="_blank" rel="noopener">github</a>{{ end }}
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <span class="icon" id="theme-icon">☀</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+</header>

@@ -1,0 +1,25 @@
+{{ define "main" }}
+<ul class="post-list">
+  {{ range .Pages }}
+  <li class="post-item">
+    <div class="post-meta">
+      <time class="post-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+      {{ if site.Params.showReadingTime }}
+        <span class="reading-time">{{ .ReadingTime }} min read</span>
+      {{ end }}
+      {{ if and site.Params.showTags .Params.tags }}
+      <div class="post-tags">
+        {{ range first 3 .Params.tags }}
+          <a class="tag" href="{{ "/tags/" | relURL }}{{ . | urlize }}">{{ . }}</a>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+    <h2 class="post-title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    {{ with .Summary }}<p class="post-summary">{{ . | plainify | truncate 180 }}</p>{{ end }}
+  </li>
+  {{ end }}
+</ul>
+
+{{ template "_internal/pagination.html" . }}
+{{ end }}

@@ -1,0 +1,27 @@
+{{ define "main" }}
+<div class="gallery-section">
+  <h1 class="section-title">{{ .Title }}</h1>
+  {{ with .Description }}<p class="section-desc">{{ . }}</p>{{ end }}
+
+  <div class="album-grid">
+    {{ range .Pages }}
+    <a class="album-card" href="{{ .RelPermalink }}">
+      {{ with .Params.cover }}
+      <div class="album-cover" style="background-image: url('{{ .image }}')"></div>
+      {{ else }}
+      <div class="album-cover album-cover--placeholder"></div>
+      {{ end }}
+      <div class="album-info">
+        <span class="album-title">{{ .Title }}</span>
+        {{ with .Params.photo_count }}
+        <span class="album-count">{{ . }} photos</span>
+        {{ end }}
+        {{ with .Date }}
+        <span class="album-date">{{ .Format "Jan 2006" }}</span>
+        {{ end }}
+      </div>
+    </a>
+    {{ end }}
+  </div>
+</div>
+{{ end }}

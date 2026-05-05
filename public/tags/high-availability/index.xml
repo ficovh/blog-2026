@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>High-Availability on netlog</title>
+    <link>http://localhost:1313/tags/high-availability/</link>
+    <description>Recent content in High-Availability on netlog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Nov 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/high-availability/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>BGP Graceful Restart: What It Is and When It Actually Helps</title>
+      <link>http://localhost:1313/posts/bgp-graceful-restart/</link>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/bgp-graceful-restart/</guid>
+      <description>A practical look at BGP Graceful Restart — the mechanism, its limitations, and when it genuinely improves convergence vs. when it&amp;#39;s just theater.</description>
+    </item>
+  </channel>
+</rss>

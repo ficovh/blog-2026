@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro | netlog</title>
+<meta name="keywords" content="opnsense, vlan, firewall, seguridad, rfc1918">
+<meta name="description" content="Configuración completa de 5 VLANs en OPNsense: asignación de IPs, aislamiento inter-VLAN vía firewall, permitir internet bloqueando RFC 1918, y hardening del perímetro.">
+<meta name="author" content="Francisco Valladolid">
+<link rel="canonical" href="http://localhost:1313/posts/opnsense-vlans-firewall/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.199042e659bc7245f5609d333d6c044eb554a0640849bb874e1dff8eb0f57209.css" integrity="sha256-GZBC5lm8ckX1YJ0zPWwETrVUoGQISbuHTh3/jrD1cgk=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/opnsense-vlans-firewall/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="netlog (Alt + H)">netlog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro
+    </h1>
+    <div class="post-description">
+      Configuración completa de 5 VLANs en OPNsense: asignación de IPs, aislamiento inter-VLAN vía firewall, permitir internet bloqueando RFC 1918, y hardening del perímetro.
+    </div>
+    <div class="post-meta"><span title='2026-04-07 00:00:00 +0000 UTC'>April 7, 2026</span>&nbsp;·&nbsp;<span>7 min</span>&nbsp;·&nbsp;<span>Francisco Valladolid</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>OPNsense es un firewall serio. Pero la GUI puede generar confusión sobre el orden correcto de operaciones — especialmente cuando combinas VLANs, interfaces, y reglas de firewall que dependen unas de otras. Este post sigue el orden exacto en que debes hacer cada paso para llegar a una configuración funcional y segura.</p>
+<h2 id="escenario">Escenario<a hidden class="anchor" aria-hidden="true" href="#escenario">#</a></h2>
+<p>Un único puerto físico (<code>em1</code>) actúa como trunk hacia un switch administrado. Cinco VLANs para segmentos distintos:</p>
+<table>
+  <thead>
+      <tr>
+          <th>VLAN</th>
+          <th>ID</th>
+          <th>Red</th>
+          <th>Propósito</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>MGT</td>
+          <td>10</td>
+          <td>10.0.10.0/24</td>
+          <td>Gestión de red</td>
+      </tr>
+      <tr>
+          <td>SRV</td>
+          <td>20</td>
+          <td>10.0.20.0/24</td>
+          <td>Servidores internos</td>
+      </tr>
+      <tr>
+          <td>USR</td>
+          <td>30</td>
+          <td>10.0.30.0/24</td>
+          <td>Usuarios / endpoints</td>
+      </tr>
+      <tr>
+          <td>IOT</td>
+          <td>40</td>
+          <td>10.0.40.0/24</td>
+          <td>Dispositivos IoT</td>
+      </tr>
+      <tr>
+          <td>DMZ</td>
+          <td>50</td>
+          <td>10.0.50.0/24</td>
+          <td>Servicios publicados</td>
+      </tr>
+  </tbody>
+</table>
+<p>El router tiene IP <code>.1</code> en cada subred. WAN en <code>em0</code>.</p>
+<hr>
+<h2 id="1-crear-las-vlans">1. Crear las VLANs<a hidden class="anchor" aria-hidden="true" href="#1-crear-las-vlans">#</a></h2>
+<p><strong>Interfaces → Other Types → VLAN → Add</strong></p>
+<p>Repite para cada VLAN:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Parent</th>
+          <th>VLAN tag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>em1</td>
+          <td>10</td>
+          <td>VLAN_MGT</td>
+      </tr>
+      <tr>
+          <td>em1</td>
+          <td>20</td>
+          <td>VLAN_SRV</td>
+      </tr>
+      <tr>
+          <td>em1</td>
+          <td>30</td>
+          <td>VLAN_USR</td>
+      </tr>
+      <tr>
+          <td>em1</td>
+          <td>40</td>
+          <td>VLAN_IOT</td>
+      </tr>
+      <tr>
+          <td>em1</td>
+          <td>50</td>
+          <td>VLAN_DMZ</td>
+      </tr>
+  </tbody>
+</table>
+<p>Guarda cada una. Aún no son interfaces asignadas — son solo subinterfaces lógicas.</p>
+<hr>
+<h2 id="2-asignar-interfaces">2. Asignar interfaces<a hidden class="anchor" aria-hidden="true" href="#2-asignar-interfaces">#</a></h2>
+<p><strong>Interfaces → Assignments → Add</strong></p>
+<p>Asigna cada VLAN a una interfaz con nombre descriptivo:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Network port</th>
+          <th>Interface name</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>em1.10 (VLAN_MGT)</td>
+          <td>MGT</td>
+      </tr>
+      <tr>
+          <td>em1.20 (VLAN_SRV)</td>
+          <td>SRV</td>
+      </tr>
+      <tr>
+          <td>em1.30 (VLAN_USR)</td>
+          <td>USR</td>
+      </tr>
+      <tr>
+          <td>em1.40 (VLAN_IOT)</td>
+          <td>IOT</td>
+      </tr>
+      <tr>
+          <td>em1.50 (VLAN_DMZ)</td>
+          <td>DMZ</td>
+      </tr>
+  </tbody>
+</table>
+<p>Guarda. Ahora aparecen en <strong>Interfaces →</strong> como entradas editables.</p>
+<hr>
+<h2 id="3-configurar-cada-interfaz">3. Configurar cada interfaz<a hidden class="anchor" aria-hidden="true" href="#3-configurar-cada-interfaz">#</a></h2>
+<p><strong>Interfaces → MGT</strong> (repite para cada una):</p>
+<ul>
+<li><strong>Enable</strong>: ✓</li>
+<li><strong>IPv4 Configuration Type</strong>: Static IPv4</li>
+<li><strong>IPv4 address</strong>: <code>10.0.10.1 / 24</code></li>
+<li><strong>Block private networks</strong>: ✗ (esto va en WAN, no aquí)</li>
+<li><strong>Block bogon networks</strong>: ✗</li>
+</ul>
+<p>Guarda y aplica. Haz lo mismo para SRV (<code>.20.1</code>), USR (<code>.30.1</code>), IOT (<code>.40.1</code>), DMZ (<code>.50.1</code>).</p>
+<blockquote>
+<p>Si no habilitas la interfaz explícitamente, OPNsense no crea la entrada en la tabla de rutas ni activa DHCP para esa red.</p>
+</blockquote>
+<hr>
+<h2 id="4-dhcp-por-vlan">4. DHCP por VLAN<a hidden class="anchor" aria-hidden="true" href="#4-dhcp-por-vlan">#</a></h2>
+<p><strong>Services → ISC DHCPv4 → [Interface]</strong></p>
+<p>Para cada interfaz:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Interfaz</th>
+          <th>Range start</th>
+          <th>Range end</th>
+          <th>DNS</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>MGT</td>
+          <td>10.0.10.100</td>
+          <td>10.0.10.200</td>
+          <td>10.0.10.1</td>
+      </tr>
+      <tr>
+          <td>SRV</td>
+          <td>10.0.20.100</td>
+          <td>10.0.20.200</td>
+          <td>10.0.20.1</td>
+      </tr>
+      <tr>
+          <td>USR</td>
+          <td>10.0.30.100</td>
+          <td>10.0.30.200</td>
+          <td>10.0.30.1</td>
+      </tr>
+      <tr>
+          <td>IOT</td>
+          <td>10.0.40.100</td>
+          <td>10.0.40.200</td>
+          <td>10.0.40.1</td>
+      </tr>
+      <tr>
+          <td>DMZ</td>
+          <td>10.0.50.100</td>
+          <td>10.0.50.200</td>
+          <td>10.0.50.1</td>
+      </tr>
+  </tbody>
+</table>
+<p>Activa <strong>Enable DHCP server on [interface]</strong> y guarda.</p>
+<hr>
+<h2 id="5-lógica-de-firewall-el-modelo-mental">5. Lógica de firewall: el modelo mental<a hidden class="anchor" aria-hidden="true" href="#5-lógica-de-firewall-el-modelo-mental">#</a></h2>
+<p>OPNsense evalúa reglas <strong>por interfaz de entrada</strong>, de arriba hacia abajo, primera coincidencia gana. Hay un <strong>deny implícito</strong> al final de cada interfaz — no necesitas escribirlo.</p>
+<p>El objetivo para cada VLAN interna:</p>
+<ol>
+<li><strong>Permitir</strong> tráfico hacia internet (cualquier IP que no sea RFC 1918 ni bogon).</li>
+<li><strong>Bloquear</strong> tráfico hacia otras VLANs y redes privadas (aislamiento).</li>
+<li><strong>Permitir</strong> consultas DNS y DHCP hacia el router si usas el resolver local.</li>
+<li><strong>Bloquear</strong> acceso a la GUI de OPNsense desde VLANs no administrativas.</li>
+</ol>
+<p>El orden importa: coloca los bloques específicos antes de los permisos amplios.</p>
+<hr>
+<h2 id="6-alias-rfc-1918-y-bogons">6. Alias: RFC 1918 y Bogons<a hidden class="anchor" aria-hidden="true" href="#6-alias-rfc-1918-y-bogons">#</a></h2>
+<p>Antes de escribir reglas, define aliases reutilizables.</p>
+<p><strong>Firewall → Aliases → Add</strong></p>
+<p><strong>Alias: RFC1918</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Name</td>
+          <td><code>RFC1918</code></td>
+      </tr>
+      <tr>
+          <td>Type</td>
+          <td>Network</td>
+      </tr>
+      <tr>
+          <td>Networks</td>
+          <td><code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Espacio privado RFC 1918</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Alias: VLANS_ALL</strong> (todas las subredes propias, útil para reglas de bloqueo)</p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Name</td>
+          <td><code>VLANS_ALL</code></td>
+      </tr>
+      <tr>
+          <td>Type</td>
+          <td>Network</td>
+      </tr>
+      <tr>
+          <td>Networks</td>
+          <td><code>10.0.10.0/24</code>, <code>10.0.20.0/24</code>, <code>10.0.30.0/24</code>, <code>10.0.40.0/24</code>, <code>10.0.50.0/24</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Alias: OPNSENSE_GUI</strong> (proteger acceso a la gestión)</p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Name</td>
+          <td><code>OPNSENSE_GUI</code></td>
+      </tr>
+      <tr>
+          <td>Type</td>
+          <td>Port</td>
+      </tr>
+      <tr>
+          <td>Ports</td>
+          <td><code>443</code>, <code>80</code></td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="7-reglas-de-firewall-por-interfaz">7. Reglas de firewall por interfaz<a hidden class="anchor" aria-hidden="true" href="#7-reglas-de-firewall-por-interfaz">#</a></h2>
+<p>Las reglas se crean en <strong>Firewall → Rules → [Interface]</strong>.</p>
+<h3 id="plantilla-aplicable-a-usr-iot-y-dmz">Plantilla aplicable a USR, IOT y DMZ<a hidden class="anchor" aria-hidden="true" href="#plantilla-aplicable-a-usr-iot-y-dmz">#</a></h3>
+<p>Estas tres VLANs son las menos confiables. Aplica este set de reglas en ese orden:</p>
+<p><strong>Regla 1 — Permitir DNS hacia el router</strong> <em>(opcional si usas Unbound)</em></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Interface</td>
+          <td>USR / IOT / DMZ</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>TCP/UDP</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>USR net / IOT net / DMZ net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>This Firewall</td>
+      </tr>
+      <tr>
+          <td>Dest. Port</td>
+          <td>DNS (53)</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Permitir DNS local</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Regla 2 — Bloquear acceso a la GUI del firewall</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Block</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>TCP</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>*net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>This Firewall</td>
+      </tr>
+      <tr>
+          <td>Dest. Port</td>
+          <td>OPNSENSE_GUI</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Bloquear acceso GUI</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Regla 3 — Bloquear hacia RFC 1918 (aislamiento inter-VLAN)</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Block</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>*net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>RFC1918</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Bloquear RFC 1918</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Regla 4 — Permitir hacia internet</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>*net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Permitir internet</td>
+      </tr>
+  </tbody>
+</table>
+<p>El orden 2→3→4 es el que importa. La regla 3 bloquea todas las IPs privadas (incluyendo las otras VLANs y el propio router excepto el DNS ya permitido en regla 1). La regla 4 solo alcanza lo que no fue bloqueado antes — es decir, IPs públicas.</p>
+<h3 id="mgt--interfaz-administrativa">MGT — Interfaz administrativa<a hidden class="anchor" aria-hidden="true" href="#mgt--interfaz-administrativa">#</a></h3>
+<p>MGT es la red desde donde administras equipos. Tiene más permisos pero sigue sin acceso directo a IOT ni DMZ sin regla explícita:</p>
+<p><strong>Regla 1 — Permitir todo desde MGT</strong> <em>(o limitar por puerto si quieres ser estricto)</em></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>MGT net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>MGT acceso total</td>
+      </tr>
+  </tbody>
+</table>
+<blockquote>
+<p>Si el principio de mínimo privilegio importa aquí, sustituye &ldquo;any&rdquo; por un alias con destinos explícitos. En muchos entornos MGT es la red del operador y esta concesión es aceptable.</p>
+</blockquote>
+<h3 id="srv--servidores-internos">SRV — Servidores internos<a hidden class="anchor" aria-hidden="true" href="#srv--servidores-internos">#</a></h3>
+<p>Los servidores pueden necesitar hablar entre ellos y hacia internet, pero no deben iniciar conexiones hacia USR ni IOT:</p>
+<p><strong>Regla 1 — Bloquear hacia USR e IOT</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Block</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>SRV net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>USR net, IOT net</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Regla 2 — Permitir hacia DMZ</strong> <em>(si los servidores publican hacia DMZ)</em></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>SRV net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>DMZ net</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Regla 3 — Permitir internet</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>SRV net</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>any</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="8-reglas-en-wan-proteger-el-perímetro">8. Reglas en WAN: proteger el perímetro<a hidden class="anchor" aria-hidden="true" href="#8-reglas-en-wan-proteger-el-perímetro">#</a></h2>
+<p><strong>Firewall → Rules → WAN</strong></p>
+<p>OPNsense por defecto bloquea todo tráfico entrante en WAN sin regla explícita — el deny implícito es suficiente para lo que no publiques. Refuerza el perímetro con estas reglas adicionales:</p>
+<p><strong>Bloquear RFC 1918 entrante</strong> <em>(spoofing de origen privado)</em></p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Block</td>
+      </tr>
+      <tr>
+          <td>Interface</td>
+          <td>WAN</td>
+      </tr>
+      <tr>
+          <td>Source</td>
+          <td>RFC1918</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>any</td>
+      </tr>
+      <tr>
+          <td>Log</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>Bloquear spoof RFC1918 desde WAN</td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Bloquear Bogons</strong> <em>(ya hay opción en la interfaz WAN, pero una regla explícita permite logging)</em></p>
+<p>Alternativamente, activa <strong>Block private networks</strong> y <strong>Block bogon networks</strong> directamente en <strong>Interfaces → WAN</strong> — OPNsense genera estas reglas internamente y las aplica antes que las reglas manuales.</p>
+<p><strong>Permitir servicios publicados desde DMZ</strong> <em>(si aplica)</em></p>
+<p>Solo agrega reglas de permitir para los puertos que realmente publicas. Ejemplo para HTTPS:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Campo</th>
+          <th>Valor</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Action</td>
+          <td>Pass</td>
+      </tr>
+      <tr>
+          <td>Interface</td>
+          <td>WAN</td>
+      </tr>
+      <tr>
+          <td>Protocol</td>
+          <td>TCP</td>
+      </tr>
+      <tr>
+          <td>Destination</td>
+          <td>DMZ net</td>
+      </tr>
+      <tr>
+          <td>Dest. Port</td>
+          <td>443</td>
+      </tr>
+      <tr>
+          <td>Description</td>
+          <td>HTTPS público → DMZ</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="9-verificación">9. Verificación<a hidden class="anchor" aria-hidden="true" href="#9-verificación">#</a></h2>
+<p><strong>Confirmar que las interfaces tienen IP:</strong></p>
+<p><strong>Interfaces → Overview</strong> — cada VLAN debe mostrar su IP <code>.1</code> y estado <code>up</code>.</p>
+<p><strong>Confirmar rutas:</strong></p>
+<p><strong>System → Routes → Status</strong></p>
+<p>Debes ver una entrada <code>/24</code> por cada VLAN apuntando a su interfaz respectiva.</p>
+<p><strong>Probar aislamiento desde un cliente en USR:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Debe fallar (RFC 1918 bloqueado)</span>
+</span></span><span class="line"><span class="cl">ping 10.0.20.1       <span class="c1"># SRV gateway</span>
+</span></span><span class="line"><span class="cl">ping 10.0.40.50      <span class="c1"># dispositivo IoT</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Debe funcionar</span>
+</span></span><span class="line"><span class="cl">ping 8.8.8.8
+</span></span><span class="line"><span class="cl">curl https://example.com
+</span></span></code></pre></div><p><strong>Ver logs de bloqueos en tiempo real:</strong></p>
+<p><strong>Firewall → Log Files → Live View</strong> — filtra por interfaz y acción <code>block</code> para confirmar que los bloqueos se están generando con las reglas correctas.</p>
+<p><strong>Diagnóstico desde la GUI:</strong></p>
+<p><strong>Interfaces → Diagnostics → Ping</strong> — selecciona la interfaz de origen para simular tráfico desde cada VLAN sin necesitar un cliente físico.</p>
+<hr>
+<h2 id="10-hardening-adicional-del-perímetro">10. Hardening adicional del perímetro<a hidden class="anchor" aria-hidden="true" href="#10-hardening-adicional-del-perímetro">#</a></h2>
+<p><strong>Deshabilitar acceso a la GUI desde WAN:</strong></p>
+<p><strong>System → Settings → Administration</strong> → desactiva acceso HTTP/HTTPS desde WAN si no usas gestión remota. Usa una VPN para administración remota.</p>
+<p><strong>IDS/IPS con Suricata:</strong></p>
+<p><strong>Services → Introspection → Suricata</strong> — actívalo en la interfaz WAN en modo IPS (inline). El conjunto de reglas ET Open cubre amenazas comunes sin coste adicional.</p>
+<p><strong>Limitar intentos de acceso a la GUI:</strong></p>
+<p><strong>System → Settings → Administration → Login Protection</strong> — activa el rate limiting. Evita fuerza bruta contra la GUI incluso desde redes internas.</p>
+<p><strong>Actualizaciones automáticas de reglas IDS:</strong></p>
+<p><strong>Services → Introspection → Suricata → Download</strong> — configura actualización diaria de reglas. Las amenazas cambian; las reglas estáticas envejecen mal.</p>
+<hr>
+<h2 id="resumen-del-modelo-de-confianza">Resumen del modelo de confianza<a hidden class="anchor" aria-hidden="true" href="#resumen-del-modelo-de-confianza">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Desde \ Hacia</th>
+          <th>MGT</th>
+          <th>SRV</th>
+          <th>USR</th>
+          <th>IOT</th>
+          <th>DMZ</th>
+          <th>Internet</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>MGT</strong></td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td><strong>SRV</strong></td>
+          <td>✗</td>
+          <td>✓</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td><strong>USR</strong></td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td><strong>IOT</strong></td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+          <td>✗</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td><strong>DMZ</strong></td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+          <td>✓</td>
+      </tr>
+      <tr>
+          <td><strong>WAN</strong></td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>Puerto específico</td>
+          <td>—</td>
+      </tr>
+  </tbody>
+</table>
+<p>El principio es simple: cada segmento puede salir a internet pero no puede hablar lateralmente con otros segmentos salvo que haya una regla explícita que lo justifique. MGT es la excepción controlada — es la red desde la que operas, y tiene visibilidad total a propósito.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/opnsense/">Opnsense</a></li>
+      <li><a href="http://localhost:1313/tags/vlan/">Vlan</a></li>
+      <li><a href="http://localhost:1313/tags/firewall/">Firewall</a></li>
+      <li><a href="http://localhost:1313/tags/seguridad/">Seguridad</a></li>
+      <li><a href="http://localhost:1313/tags/rfc1918/">Rfc1918</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://localhost:1313/posts/mikrotik-dual-wan-balanceo/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</span>
+  </a>
+  <a class="next" href="http://localhost:1313/posts/subnetting-reference/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Subnetting: From First Principles to VLSM</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="http://localhost:1313/">netlog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
