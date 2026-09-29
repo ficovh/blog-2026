@@ -1,0 +1,26 @@
+{{- define "main" }}
+<div class="wrap content gallery">
+  <h1 class="post_title">{{ .Title }}</h1>
+  {{- with .Description }}<p class="gallery_desc">{{ . }}</p>{{ end }}
+  <div class="album_grid">
+    {{- range .Pages }}
+    <a class="album_card" href="{{ .RelPermalink }}">
+      {{- $cover := "" }}
+      {{- with .Params.cover }}{{ if fileExists (path.Join "static" .image) }}{{ $cover = .image }}{{ end }}{{ end }}
+      {{- if not $cover }}{{ with index (.Params.photos | default slice) 0 }}{{ $cover = .src }}{{ end }}{{ end }}
+      {{- if $cover }}
+      <div class="album_cover" style="background-image: url('{{ $cover | relURL }}')"></div>
+      {{- else }}
+      <div class="album_cover album_cover--empty"></div>
+      {{- end }}
+      <div class="album_info">
+        <span class="album_title">{{ .Title }}</span>
+        <span class="album_meta">
+          {{- with .Params.photos }}{{ len . }} photos · {{ end }}{{ .Date.Format "Jan 2006" -}}
+        </span>
+      </div>
+    </a>
+    {{- end }}
+  </div>
+</div>
+{{- end }}

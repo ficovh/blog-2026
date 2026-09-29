@@ -1,0 +1,98 @@
+// About
+.about_profile
+  display: flex
+  align-items: center
+  gap: 1.25rem
+  margin-bottom: 1.5rem
+  .post_title
+    margin: 0
+
+.about_photo
+  width: 96px
+  height: 96px
+  border-radius: 50%
+  object-fit: cover
+  box-shadow: 0 0 1.5rem var(--shadow)
+
+// Gallery
+.gallery
+  padding-top: 2rem
+  padding-bottom: 3rem
+
+.gallery_desc
+  color: var(--text)
+  margin: 0.5rem 0 1.5rem
+
+.gallery_back
+  display: inline-block
+  margin-bottom: 1rem
+  color: var(--theme)
+
+.gallery_date
+  display: block
+  font-size: 0.9rem
+  opacity: 0.7
+  margin-bottom: 1.5rem
+
+.album_grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))
+  gap: 1.5rem
+
+.album_card
+  display: block
+  border-radius: 0.5rem
+  overflow: hidden
+  background: var(--post-bg)
+  box-shadow: 0 0 1.5rem var(--shadow)
+  transition: transform 0.3s var(--ease)
+  &:hover
+    transform: translateY(-3px)
+
+.album_cover
+  aspect-ratio: 4 / 3
+  background-size: cover
+  background-position: center
+  &--empty
+    background: var(--translucent)
+
+.album_info
+  display: flex
+  flex-direction: column
+  padding: 0.85rem 1rem
+
+.album_title
+  font-weight: 700
+  color: var(--header-text)
+
+.album_meta
+  font-size: 0.85rem
+  opacity: 0.7
+
+.photo_grid
+  display: grid
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr))
+  gap: 1rem
+
+.photo_thumb
+  position: relative
+  display: block
+  border-radius: 0.5rem
+  overflow: hidden
+  aspect-ratio: 1
+  img
+    width: 100%
+    height: 100%
+    object-fit: cover
+    margin: 0
+    transition: transform 0.4s var(--ease)
+  &:hover img
+    transform: scale(1.05)
+
+.photo_caption
+  position: absolute
+  inset: auto 0 0 0
+  padding: 0.5rem 0.75rem
+  font-size: 0.85rem
+  color: #fff
+  background: linear-gradient(transparent, rgba(0,0,0,0.7))

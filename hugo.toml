@@ -1,46 +1,55 @@
 baseURL = "https://blog.bsdguy.org/"
 languageCode = "en-us"
 title = "netlog"
-theme = "PaperMod"
-paginate = 10
+theme = "hugo-clarity"
+copyright = "Francisco Valladolid"
 enableEmoji = true
 enableRobotsTXT = true
+enableInlineShortcodes = true
 buildDrafts = false
 buildFuture = false
 
+[pagination]
+  pagerSize = 10
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
 [params]
-  author = "Francisco Valladolid"
   description = "Network engineer. Writing about routing, automation, and the internet's plumbing."
-  defaultTheme = "dark"
-  ShowReadingTime = true
-  ShowTags = true
-  ShowShareButtons = false
-  ShowPostNavLinks = true
-  ShowBreadCrumbs = true
-  ShowCodeCopyButtons = true
-  ShowWordCount = false
-  ShowRssButtonInSectionTermList = true
-  disableScrollToTop = false
+  introDescription = "Network engineer. Writing about routing, automation, and the internet's plumbing."
+  introURL = "about/"
+  mainSections = ["posts"]
+  blogDir = "posts"
+  enableSearch = true
+  enforceDarkMode = true
+  mobileNavigation = "left"
+  codeMaxLines = 20
+  codeLineNumbers = false
+  figurePositionShow = false
+  usePageBundles = false
+  showShare = false
   comments = false
+  since = 2024
+  numberOfTagsShown = 14
+  fallBackOgImage = "profile.jpg"
 
-  [params.homeInfoParams]
-    Title = "netlog"
-    Content = "Network engineer. Writing about routing, automation, and the internet's plumbing."
-
-  [[params.socialIcons]]
-    name = "github"
-    url = "https://github.com/ficovh"
+  [params.author]
+    name = "Francisco Valladolid"
+    photo = "profile.jpg"
 
 [markup]
-  [markup.highlight]
-    style = "base16-snazzy"
-    lineNos = false
-    codeFences = true
-    guessSyntax = true
-    tabWidth = 2
-    noClasses = false
   [markup.goldmark.renderer]
     unsafe = true
+  [markup.highlight]
+    codeFences = true
+    guessSyntax = true
+    lineNoStart = 1
+    # Clarity requiere lineNos=true + lineNumbersInTable=false para su toggle de números de línea
+    lineNos = true
+    lineNumbersInTable = false
+    noClasses = false
+    tabWidth = 2
 
 [taxonomies]
   tag = "tags"
@@ -53,12 +62,21 @@ buildFuture = false
     url = "/posts/"
     weight = 10
   [[menu.main]]
-    identifier = "tags"
-    name = "Tags"
-    url = "/tags/"
+    identifier = "gallery"
+    name = "Gallery"
+    url = "/gallery/"
     weight = 20
   [[menu.main]]
     identifier = "about"
     name = "About"
     url = "/about/"
     weight = 30
+
+  [[menu.social]]
+    name = "github"
+    url = "https://github.com/ficovh"
+    weight = 1
+  [[menu.social]]
+    name = "rss"
+    url = "index.xml"
+    weight = 2

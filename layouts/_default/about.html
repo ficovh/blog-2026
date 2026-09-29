@@ -1,0 +1,16 @@
+{{- define "main" }}
+<div class="grid-inverse wrap content">
+  <article class="post_content">
+    <div class="about_profile">
+      {{- with .Params.photo }}
+      <img class="about_photo" src="{{ . | relURL }}" alt="{{ site.Params.author.name | default $.Title }}">
+      {{- end }}
+      <h1 class="post_title">{{ .Title | markdownify }}</h1>
+    </div>
+    <div class="post_body">
+      {{- .Content }}
+    </div>
+  </article>
+  {{- partial "sidebar" . }}
+</div>
+{{- end }}
