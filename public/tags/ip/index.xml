@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ip on netlog</title>
+    <link>http://localhost:1313/tags/ip/</link>
+    <description>Recent content in Ip on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Tue, 07 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/ip/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Subnetting: From First Principles to VLSM</title>
+      <link>http://localhost:1313/posts/subnetting-reference/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/subnetting-reference/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Subnetting is one of those skills that seems intimidating until it clicks, and then it feels obvious. This post builds from first principles — binary representation, masks, and block sizes — through variable-length subnet masking (VLSM) and summarization.&lt;/p&gt;
+&lt;h2 id=&#34;ip-address-structure&#34;&gt;IP Address Structure&lt;/h2&gt;
+&lt;p&gt;An IPv4 address is 32 bits divided into two logical parts: &lt;strong&gt;network&lt;/strong&gt; and &lt;strong&gt;host&lt;/strong&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;192.168.10.25 = 11000000.10101000.00001010.00011001
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The subnet mask defines the split. A &lt;code&gt;255.255.255.0&lt;/code&gt; mask (or &lt;code&gt;/24&lt;/code&gt; in CIDR) means the first 24 bits identify the network, the last 8 identify the host.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

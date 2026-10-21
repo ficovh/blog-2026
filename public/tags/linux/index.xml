@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux on netlog</title>
+    <link>http://localhost:1313/tags/linux/</link>
+    <description>Recent content in Linux on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Respaldos de MariaDB con Python: mariadb-dump, Rotación y systemd</title>
+      <link>http://localhost:1313/posts/mariadb-respaldos-python/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mariadb-respaldos-python/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El respaldo más común de MariaDB es una línea en el crontab:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;mysqldump --all-databases &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; gzip &amp;gt; /backup/db-&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;date +%F&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;.sql.gz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Funciona hasta el día en que no. Si &lt;code&gt;mysqldump&lt;/code&gt; falla a la mitad — el servidor se reinicia, se llena el disco, una tabla está corrupta — &lt;code&gt;gzip&lt;/code&gt; recibe un flujo cortado, lo comprime sin quejarse y el pipeline termina con código 0, porque el shell solo mira el código del &lt;strong&gt;último&lt;/strong&gt; comando. Tienes un archivo con fecha de hoy, tamaño razonable y la mitad de tus datos. Te enteras cuando intentas restaurar.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS 1.5: MultiWAN con Balanceo de Carga y Failover</title>
+      <link>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Tener dos proveedores de internet solo sirve si el router sabe usarlos. VyOS resuelve esto con el módulo &lt;strong&gt;WAN Load Balancing&lt;/strong&gt; (&lt;code&gt;load-balancing wan&lt;/code&gt;), que reparte las conexiones nuevas entre varios enlaces, vigila la salud de cada uno y los saca de rotación cuando fallan — todo desde el mismo árbol de configuración, sin scripts externos ni marcas de mangle a mano como en otras plataformas.&lt;/p&gt;
+&lt;p&gt;Este post construye la configuración completa sobre &lt;strong&gt;VyOS 1.5 (Circinus)&lt;/strong&gt;, paso a paso, explicando qué hace cada bloque y por qué está ahí.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Configurando RADIUS con FreeRADIUS y daloRADIUS para autenticación PPPoE</title>
+      <link>http://localhost:1313/posts/freeradius-daloradius-pppoe/</link>
+      <pubDate>Mon, 29 Jun 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/freeradius-daloradius-pppoe/</guid>
+      <description>
+        
+          
+            &lt;p&gt;RADIUS (Remote Authentication Dial-In User Service) es el estándar de facto para centralizar la autenticación, autorización y contabilidad (AAA) de usuarios en redes de acceso. En ISPs pequeños y medianos, la combinación &lt;strong&gt;FreeRADIUS + MariaDB + daloRADIUS&lt;/strong&gt; ofrece un stack robusto y gratuito que puede manejar miles de sesiones PPPoE. Este post cubre la instalación completa desde cero en Debian/Ubuntu, con un servidor PPPoE MikroTik como NAS.&lt;/p&gt;
+&lt;h2 id=&#34;arquitectura&#34;&gt;Arquitectura&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Suscriptor DSL/FTTH
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  CPE (modem/bridge)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │  PPPoE
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 7&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;┌─────────────────┐        RADIUS (UDP 1812/1813)       ┌────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 8&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  MikroTik L2TP  │ ─────────────────────────────────► │   FreeRADIUS       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 9&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  / PPPoE Server │                                     │   + MariaDB        │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  (NAS)          │ ◄─────────────────────────────────  │   (192.168.1.10)   │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;11&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;└─────────────────┘       Access-Accept / Reject         └────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;12&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                                  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;13&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         ┌────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;14&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         │   daloRADIUS       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;15&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         │   (web UI PHP)     │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;16&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         └────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Componente&lt;/th&gt;
+					&lt;th&gt;Rol&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;FreeRADIUS&lt;/td&gt;
+					&lt;td&gt;Servidor AAA, procesa solicitudes del NAS&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;MariaDB&lt;/td&gt;
+					&lt;td&gt;Backend con usuarios, grupos y atributos&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;daloRADIUS&lt;/td&gt;
+					&lt;td&gt;Interfaz web para gestión de usuarios y reportes&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;MikroTik&lt;/td&gt;
+					&lt;td&gt;NAS que autentica sesiones PPPoE contra RADIUS&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;paso-1-instalar-mariadb-y-crear-la-base-de-datos&#34;&gt;Paso 1: Instalar MariaDB y crear la base de datos&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;apt update &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt install -y mariadb-server
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;mysql_secure_installation
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Crear la base de datos y el usuario:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos</title>
+      <link>http://localhost:1313/posts/vyos-dhcp-server/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-dhcp-server/</guid>
+      <description>
+        
+          
+            &lt;p&gt;VyOS incluye un servidor DHCP completo basado en ISC DHCP. La configuración vive bajo &lt;code&gt;set service dhcp-server&lt;/code&gt; y sigue el mismo modelo jerárquico que el resto del sistema: se edita en modo configuración, se valida con &lt;code&gt;commit&lt;/code&gt; y se persiste con &lt;code&gt;save&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Este post parte del escenario definido en &lt;a href=&#34;http://localhost:1313/posts/vyos-primera-configuracion/&#34;&gt;VyOS: Primera Configuración&lt;/a&gt; y agrega DHCP para la LAN principal y dos VLANs.&lt;/p&gt;
+&lt;h2 id=&#34;escenario-de-referencia&#34;&gt;Escenario de referencia&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Internet
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth0  (WAN)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt; [VyOS]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;7&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1          LAN principal  — 192.168.1.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;8&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1.10       VLAN 10 Servidores — 10.10.10.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;9&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1.20       VLAN 20 Usuarios   — 10.10.20.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Cada segmento necesita su propio servidor DHCP, porque VyOS actúa como gateway de cada red.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>
+        
+          
+            &lt;p&gt;VyOS es un router/firewall de código abierto basado en Debian. A diferencia de equipos como MikroTik o Cisco, toda la configuración vive en un árbol jerárquico que se edita en &lt;strong&gt;modo de configuración&lt;/strong&gt; y se confirma con &lt;code&gt;commit&lt;/code&gt;. Este modelo — inspirado en Junos — hace que los cambios sean atómicos y reversibles, lo cual es una ventaja real en producción.&lt;/p&gt;
+&lt;p&gt;Este post cubre los cuatro bloques fundamentales para dejar un router VyOS operativo: NAT, Firewall, Rutas Estáticas y VLANs.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

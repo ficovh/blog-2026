@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ospf on netlog</title>
+    <link>http://localhost:1313/tags/ospf/</link>
+    <description>Recent content in Ospf on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Sat, 14 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/ospf/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>OSPF LSA Types: A Field Reference</title>
+      <link>http://localhost:1313/posts/ospf-lsa-types/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/ospf-lsa-types/</guid>
+      <description>
+        
+          
+            &lt;p&gt;OSPF link-state advertisements are the currency of the protocol. Understanding which LSA type carries what information — and who generates it — is essential for troubleshooting convergence issues.&lt;/p&gt;
+&lt;h2 id=&#34;quick-reference&#34;&gt;Quick Reference&lt;/h2&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Type&lt;/th&gt;
+					&lt;th&gt;Name&lt;/th&gt;
+					&lt;th&gt;Originated By&lt;/th&gt;
+					&lt;th&gt;Scope&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1&lt;/td&gt;
+					&lt;td&gt;Router LSA&lt;/td&gt;
+					&lt;td&gt;Every router&lt;/td&gt;
+					&lt;td&gt;Single area&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;2&lt;/td&gt;
+					&lt;td&gt;Network LSA&lt;/td&gt;
+					&lt;td&gt;DR on broadcast segment&lt;/td&gt;
+					&lt;td&gt;Single area&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;3&lt;/td&gt;
+					&lt;td&gt;Summary LSA&lt;/td&gt;
+					&lt;td&gt;ABR&lt;/td&gt;
+					&lt;td&gt;Area → backbone&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;4&lt;/td&gt;
+					&lt;td&gt;ASBR Summary&lt;/td&gt;
+					&lt;td&gt;ABR&lt;/td&gt;
+					&lt;td&gt;Area → backbone&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;5&lt;/td&gt;
+					&lt;td&gt;AS External&lt;/td&gt;
+					&lt;td&gt;ASBR&lt;/td&gt;
+					&lt;td&gt;Entire OSPF domain&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;7&lt;/td&gt;
+					&lt;td&gt;NSSA External&lt;/td&gt;
+					&lt;td&gt;ASBR in NSSA&lt;/td&gt;
+					&lt;td&gt;Single NSSA area&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;type-1--router-lsa&#34;&gt;Type 1 — Router LSA&lt;/h2&gt;
+&lt;p&gt;Every OSPF router originates one Type 1 LSA per area it belongs to. It describes:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

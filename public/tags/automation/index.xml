@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Automation on netlog</title>
+    <link>http://localhost:1313/tags/automation/</link>
+    <description>Recent content in Automation on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/automation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Respaldos de MariaDB con Python: mariadb-dump, Rotación y systemd</title>
+      <link>http://localhost:1313/posts/mariadb-respaldos-python/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mariadb-respaldos-python/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El respaldo más común de MariaDB es una línea en el crontab:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;mysqldump --all-databases &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; gzip &amp;gt; /backup/db-&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;date +%F&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;.sql.gz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Funciona hasta el día en que no. Si &lt;code&gt;mysqldump&lt;/code&gt; falla a la mitad — el servidor se reinicia, se llena el disco, una tabla está corrupta — &lt;code&gt;gzip&lt;/code&gt; recibe un flujo cortado, lo comprime sin quejarse y el pipeline termina con código 0, porque el shell solo mira el código del &lt;strong&gt;último&lt;/strong&gt; comando. Tienes un archivo con fecha de hoy, tamaño razonable y la mitad de tus datos. Te enteras cuando intentas restaurar.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Network Automation with Ansible: A Practical Starting Point</title>
+      <link>http://localhost:1313/posts/network-automation-ansible/</link>
+      <pubDate>Fri, 05 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/network-automation-ansible/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Most network automation tutorials start with a playbook that configures a VLAN. That&amp;rsquo;s fine, but it skips the part where you understand &lt;em&gt;why&lt;/em&gt; Ansible is structured the way it is and when you should reach for something else.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s a practical foundation.&lt;/p&gt;
+&lt;h2 id=&#34;why-ansible-for-networks&#34;&gt;Why Ansible for Networks?&lt;/h2&gt;
+&lt;p&gt;Ansible uses an agentless model — it connects via SSH (or NETCONF, or HTTPS depending on the platform). No agent to install. For network devices, this is almost always the right model.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

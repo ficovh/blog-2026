@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vpn on netlog</title>
+    <link>http://localhost:1313/tags/vpn/</link>
+    <description>Recent content in Vpn on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Wed, 21 Oct 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/vpn/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WireGuard en OpenBSD 8.0 para Road Warriors con Acceso a la LAN</title>
+      <link>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</link>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un &lt;em&gt;road warrior&lt;/em&gt; es el usuario que se conecta desde donde esté: la laptop en un hotel, el teléfono en la red del aeropuerto, la casa de un técnico de guardia. No tiene IP fija, cambia de red varias veces al día y necesita llegar a lo mismo de siempre: el NAS, la consola del hipervisor, el ERP, la impresora de la oficina.&lt;/p&gt;
+&lt;p&gt;WireGuard es la herramienta correcta para esto. Es pequeño, rápido, sobrevive a los cambios de red sin renegociar nada y su configuración cabe en una pantalla. En OpenBSD además no hay que instalar nada: el driver &lt;a href=&#34;https://man.openbsd.org/wg.4&#34;&gt;&lt;code&gt;wg(4)&lt;/code&gt;&lt;/a&gt; es parte del kernel desde la 6.8, y todo se configura con &lt;code&gt;ifconfig&lt;/code&gt; y &lt;code&gt;pf&lt;/code&gt;, las mismas herramientas con las que ya administras el resto del firewall.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

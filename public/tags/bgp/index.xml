@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bgp on netlog</title>
+    <link>http://localhost:1313/tags/bgp/</link>
+    <description>Recent content in Bgp on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Tue, 14 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/bgp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>OPNsense como Firewall Básico para ISP</title>
+      <link>http://localhost:1313/posts/opnsense-firewall-isp-basico/</link>
+      <pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-firewall-isp-basico/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un ISP tiene requisitos distintos a una red corporativa. No hay usuarios internos navegando sitios de entretenimiento — hay clientes con IPs asignadas, tránsito hacia upstream providers, equipos de red que deben protegerse del tráfico de clientes, y un plano de gestión que no puede quedar expuesto. OPNsense cubre este caso de uso con solidez si entiendes qué configurar y en qué orden.&lt;/p&gt;
+&lt;h2 id=&#34;topología-de-referencia&#34;&gt;Topología de referencia&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Upstream (tránsito)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em0 ] — WAN / Transit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   OPNsense
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em1 ] — Red de clientes (PPPoE o IPs estáticas)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em2 ] — Gestión (OOB / equipos de red)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Interfaz&lt;/th&gt;
+					&lt;th&gt;Nombre&lt;/th&gt;
+					&lt;th&gt;Red&lt;/th&gt;
+					&lt;th&gt;Propósito&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em0&lt;/td&gt;
+					&lt;td&gt;WAN&lt;/td&gt;
+					&lt;td&gt;IP del upstream&lt;/td&gt;
+					&lt;td&gt;Tránsito hacia internet&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em1&lt;/td&gt;
+					&lt;td&gt;CLIENTES&lt;/td&gt;
+					&lt;td&gt;100.64.0.0/22&lt;/td&gt;
+					&lt;td&gt;Segmento de clientes (CG-NAT o pública)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em2&lt;/td&gt;
+					&lt;td&gt;MGMT&lt;/td&gt;
+					&lt;td&gt;10.255.0.0/24&lt;/td&gt;
+					&lt;td&gt;Gestión de infraestructura&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;100.64.0.0/10&lt;/code&gt; es el espacio CGNAT (RFC 6598). Úsalo si no tienes IPs públicas para todos tus clientes.&lt;/p&gt;
+&lt;/blockquote&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>BGP Graceful Restart: What It Is and When It Actually Helps</title>
+      <link>http://localhost:1313/posts/bgp-graceful-restart/</link>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/bgp-graceful-restart/</guid>
+      <description>
+        
+          
+            &lt;p&gt;BGP Graceful Restart (GR) is one of those features you turn on everywhere because the vendor datasheet says it improves availability — and then you spend the next year debugging weird convergence behavior because of it.&lt;/p&gt;
+&lt;p&gt;Let me break down what GR actually does, and more importantly, when it helps versus when it makes things worse.&lt;/p&gt;
+&lt;h2 id=&#34;the-problem-it-solves&#34;&gt;The Problem It Solves&lt;/h2&gt;
+&lt;p&gt;When a BGP speaker restarts (software upgrade, process crash, failover), it tears down all its sessions. Every peer withdraws the routes it learned from that speaker, and the network reconverges. This takes time — seconds to minutes, depending on your topology.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

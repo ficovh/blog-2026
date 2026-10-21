@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Seguridad on netlog</title>
+    <link>http://localhost:1313/tags/seguridad/</link>
+    <description>Recent content in Seguridad on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Tue, 07 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/seguridad/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</title>
+      <link>http://localhost:1313/posts/opnsense-vlans-firewall/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-vlans-firewall/</guid>
+      <description>
+        
+          
+            &lt;p&gt;OPNsense es un firewall serio. Pero la GUI puede generar confusión sobre el orden correcto de operaciones — especialmente cuando combinas VLANs, interfaces, y reglas de firewall que dependen unas de otras. Este post sigue el orden exacto en que debes hacer cada paso para llegar a una configuración funcional y segura.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;p&gt;Un único puerto físico (&lt;code&gt;em1&lt;/code&gt;) actúa como trunk hacia un switch administrado. Cinco VLANs para segmentos distintos:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

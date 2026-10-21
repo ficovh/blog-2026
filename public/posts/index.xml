@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on netlog</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Wed, 21 Oct 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WireGuard en OpenBSD 8.0 para Road Warriors con Acceso a la LAN</title>
+      <link>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</link>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un &lt;em&gt;road warrior&lt;/em&gt; es el usuario que se conecta desde donde esté: la laptop en un hotel, el teléfono en la red del aeropuerto, la casa de un técnico de guardia. No tiene IP fija, cambia de red varias veces al día y necesita llegar a lo mismo de siempre: el NAS, la consola del hipervisor, el ERP, la impresora de la oficina.&lt;/p&gt;
+&lt;p&gt;WireGuard es la herramienta correcta para esto. Es pequeño, rápido, sobrevive a los cambios de red sin renegociar nada y su configuración cabe en una pantalla. En OpenBSD además no hay que instalar nada: el driver &lt;a href=&#34;https://man.openbsd.org/wg.4&#34;&gt;&lt;code&gt;wg(4)&lt;/code&gt;&lt;/a&gt; es parte del kernel desde la 6.8, y todo se configura con &lt;code&gt;ifconfig&lt;/code&gt; y &lt;code&gt;pf&lt;/code&gt;, las mismas herramientas con las que ya administras el resto del firewall.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Respaldos de MariaDB con Python: mariadb-dump, Rotación y systemd</title>
+      <link>http://localhost:1313/posts/mariadb-respaldos-python/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mariadb-respaldos-python/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El respaldo más común de MariaDB es una línea en el crontab:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;mysqldump --all-databases &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; gzip &amp;gt; /backup/db-&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;date +%F&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;.sql.gz
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Funciona hasta el día en que no. Si &lt;code&gt;mysqldump&lt;/code&gt; falla a la mitad — el servidor se reinicia, se llena el disco, una tabla está corrupta — &lt;code&gt;gzip&lt;/code&gt; recibe un flujo cortado, lo comprime sin quejarse y el pipeline termina con código 0, porque el shell solo mira el código del &lt;strong&gt;último&lt;/strong&gt; comando. Tienes un archivo con fecha de hoy, tamaño razonable y la mitad de tus datos. Te enteras cuando intentas restaurar.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS 1.5: MultiWAN con Balanceo de Carga y Failover</title>
+      <link>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Tener dos proveedores de internet solo sirve si el router sabe usarlos. VyOS resuelve esto con el módulo &lt;strong&gt;WAN Load Balancing&lt;/strong&gt; (&lt;code&gt;load-balancing wan&lt;/code&gt;), que reparte las conexiones nuevas entre varios enlaces, vigila la salud de cada uno y los saca de rotación cuando fallan — todo desde el mismo árbol de configuración, sin scripts externos ni marcas de mangle a mano como en otras plataformas.&lt;/p&gt;
+&lt;p&gt;Este post construye la configuración completa sobre &lt;strong&gt;VyOS 1.5 (Circinus)&lt;/strong&gt;, paso a paso, explicando qué hace cada bloque y por qué está ahí.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>OPNsense como Firewall Básico para ISP</title>
+      <link>http://localhost:1313/posts/opnsense-firewall-isp-basico/</link>
+      <pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-firewall-isp-basico/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un ISP tiene requisitos distintos a una red corporativa. No hay usuarios internos navegando sitios de entretenimiento — hay clientes con IPs asignadas, tránsito hacia upstream providers, equipos de red que deben protegerse del tráfico de clientes, y un plano de gestión que no puede quedar expuesto. OPNsense cubre este caso de uso con solidez si entiendes qué configurar y en qué orden.&lt;/p&gt;
+&lt;h2 id=&#34;topología-de-referencia&#34;&gt;Topología de referencia&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Upstream (tránsito)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em0 ] — WAN / Transit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   OPNsense
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em1 ] — Red de clientes (PPPoE o IPs estáticas)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em2 ] — Gestión (OOB / equipos de red)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Interfaz&lt;/th&gt;
+					&lt;th&gt;Nombre&lt;/th&gt;
+					&lt;th&gt;Red&lt;/th&gt;
+					&lt;th&gt;Propósito&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em0&lt;/td&gt;
+					&lt;td&gt;WAN&lt;/td&gt;
+					&lt;td&gt;IP del upstream&lt;/td&gt;
+					&lt;td&gt;Tránsito hacia internet&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em1&lt;/td&gt;
+					&lt;td&gt;CLIENTES&lt;/td&gt;
+					&lt;td&gt;100.64.0.0/22&lt;/td&gt;
+					&lt;td&gt;Segmento de clientes (CG-NAT o pública)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em2&lt;/td&gt;
+					&lt;td&gt;MGMT&lt;/td&gt;
+					&lt;td&gt;10.255.0.0/24&lt;/td&gt;
+					&lt;td&gt;Gestión de infraestructura&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;100.64.0.0/10&lt;/code&gt; es el espacio CGNAT (RFC 6598). Úsalo si no tienes IPs públicas para todos tus clientes.&lt;/p&gt;
+&lt;/blockquote&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Configurando RADIUS con FreeRADIUS y daloRADIUS para autenticación PPPoE</title>
+      <link>http://localhost:1313/posts/freeradius-daloradius-pppoe/</link>
+      <pubDate>Mon, 29 Jun 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/freeradius-daloradius-pppoe/</guid>
+      <description>
+        
+          
+            &lt;p&gt;RADIUS (Remote Authentication Dial-In User Service) es el estándar de facto para centralizar la autenticación, autorización y contabilidad (AAA) de usuarios en redes de acceso. En ISPs pequeños y medianos, la combinación &lt;strong&gt;FreeRADIUS + MariaDB + daloRADIUS&lt;/strong&gt; ofrece un stack robusto y gratuito que puede manejar miles de sesiones PPPoE. Este post cubre la instalación completa desde cero en Debian/Ubuntu, con un servidor PPPoE MikroTik como NAS.&lt;/p&gt;
+&lt;h2 id=&#34;arquitectura&#34;&gt;Arquitectura&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Suscriptor DSL/FTTH
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  CPE (modem/bridge)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │  PPPoE
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 7&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;┌─────────────────┐        RADIUS (UDP 1812/1813)       ┌────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 8&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  MikroTik L2TP  │ ─────────────────────────────────► │   FreeRADIUS       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt; 9&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  / PPPoE Server │                                     │   + MariaDB        │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;│  (NAS)          │ ◄─────────────────────────────────  │   (192.168.1.10)   │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;11&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;└─────────────────┘       Access-Accept / Reject         └────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;12&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                                  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;13&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         ┌────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;14&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         │   daloRADIUS       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;15&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         │   (web UI PHP)     │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;16&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                                                         └────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Componente&lt;/th&gt;
+					&lt;th&gt;Rol&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;FreeRADIUS&lt;/td&gt;
+					&lt;td&gt;Servidor AAA, procesa solicitudes del NAS&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;MariaDB&lt;/td&gt;
+					&lt;td&gt;Backend con usuarios, grupos y atributos&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;daloRADIUS&lt;/td&gt;
+					&lt;td&gt;Interfaz web para gestión de usuarios y reportes&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;MikroTik&lt;/td&gt;
+					&lt;td&gt;NAS que autentica sesiones PPPoE contra RADIUS&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;paso-1-instalar-mariadb-y-crear-la-base-de-datos&#34;&gt;Paso 1: Instalar MariaDB y crear la base de datos&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;apt update &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt install -y mariadb-server
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;mysql_secure_installation
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Crear la base de datos y el usuario:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS: Configurar un Servidor DHCP con Ejemplos Prácticos</title>
+      <link>http://localhost:1313/posts/vyos-dhcp-server/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-dhcp-server/</guid>
+      <description>
+        
+          
+            &lt;p&gt;VyOS incluye un servidor DHCP completo basado en ISC DHCP. La configuración vive bajo &lt;code&gt;set service dhcp-server&lt;/code&gt; y sigue el mismo modelo jerárquico que el resto del sistema: se edita en modo configuración, se valida con &lt;code&gt;commit&lt;/code&gt; y se persiste con &lt;code&gt;save&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Este post parte del escenario definido en &lt;a href=&#34;http://localhost:1313/posts/vyos-primera-configuracion/&#34;&gt;VyOS: Primera Configuración&lt;/a&gt; y agrega DHCP para la LAN principal y dos VLANs.&lt;/p&gt;
+&lt;h2 id=&#34;escenario-de-referencia&#34;&gt;Escenario de referencia&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Internet
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth0  (WAN)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt; [VyOS]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;7&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1          LAN principal  — 192.168.1.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;8&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1.10       VLAN 10 Servidores — 10.10.10.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;9&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;  eth1.20       VLAN 20 Usuarios   — 10.10.20.1/24
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Cada segmento necesita su propio servidor DHCP, porque VyOS actúa como gateway de cada red.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>
+        
+          
+            &lt;p&gt;VyOS es un router/firewall de código abierto basado en Debian. A diferencia de equipos como MikroTik o Cisco, toda la configuración vive en un árbol jerárquico que se edita en &lt;strong&gt;modo de configuración&lt;/strong&gt; y se confirma con &lt;code&gt;commit&lt;/code&gt;. Este modelo — inspirado en Junos — hace que los cambios sean atómicos y reversibles, lo cual es una ventaja real en producción.&lt;/p&gt;
+&lt;p&gt;Este post cubre los cuatro bloques fundamentales para dejar un router VyOS operativo: NAT, Firewall, Rutas Estáticas y VLANs.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</title>
+      <link>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El balanceo de dos enlaces WAN en MikroTik es uno de esos temas donde la documentación oficial muestra el esqueleto pero omite los detalles que hacen que la configuración sea estable en producción. Este post cubre la implementación completa con &lt;strong&gt;Per-Connection Classifier (PCC)&lt;/strong&gt;, failover automático con &lt;strong&gt;Netwatch&lt;/strong&gt;, y las reglas de mangle necesarias para que el tráfico saliente y las conexiones establecidas se comporten correctamente.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP1 ─── ether1 (100 Mbps)  ┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                              ├─── MikroTik ─── LAN (192.168.1.0/24)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP2 ─── ether2 (100 Mbps)  ┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Variable&lt;/th&gt;
+					&lt;th&gt;ISP1&lt;/th&gt;
+					&lt;th&gt;ISP2&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Interfaz&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether2&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;IP del router&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.2/30&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.2/30&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Gateway&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Ajusta las IPs a tu entorno. El procedimiento es idéntico con direcciones DHCP — solo cambia cómo obtienes el gateway.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</title>
+      <link>http://localhost:1313/posts/opnsense-vlans-firewall/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-vlans-firewall/</guid>
+      <description>
+        
+          
+            &lt;p&gt;OPNsense es un firewall serio. Pero la GUI puede generar confusión sobre el orden correcto de operaciones — especialmente cuando combinas VLANs, interfaces, y reglas de firewall que dependen unas de otras. Este post sigue el orden exacto en que debes hacer cada paso para llegar a una configuración funcional y segura.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;p&gt;Un único puerto físico (&lt;code&gt;em1&lt;/code&gt;) actúa como trunk hacia un switch administrado. Cinco VLANs para segmentos distintos:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Subnetting: From First Principles to VLSM</title>
+      <link>http://localhost:1313/posts/subnetting-reference/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/subnetting-reference/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Subnetting is one of those skills that seems intimidating until it clicks, and then it feels obvious. This post builds from first principles — binary representation, masks, and block sizes — through variable-length subnet masking (VLSM) and summarization.&lt;/p&gt;
+&lt;h2 id=&#34;ip-address-structure&#34;&gt;IP Address Structure&lt;/h2&gt;
+&lt;p&gt;An IPv4 address is 32 bits divided into two logical parts: &lt;strong&gt;network&lt;/strong&gt; and &lt;strong&gt;host&lt;/strong&gt;.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;192.168.10.25 = 11000000.10101000.00001010.00011001
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The subnet mask defines the split. A &lt;code&gt;255.255.255.0&lt;/code&gt; mask (or &lt;code&gt;/24&lt;/code&gt; in CIDR) means the first 24 bits identify the network, the last 8 identify the host.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>BGP Graceful Restart: What It Is and When It Actually Helps</title>
+      <link>http://localhost:1313/posts/bgp-graceful-restart/</link>
+      <pubDate>Thu, 20 Nov 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/bgp-graceful-restart/</guid>
+      <description>
+        
+          
+            &lt;p&gt;BGP Graceful Restart (GR) is one of those features you turn on everywhere because the vendor datasheet says it improves availability — and then you spend the next year debugging weird convergence behavior because of it.&lt;/p&gt;
+&lt;p&gt;Let me break down what GR actually does, and more importantly, when it helps versus when it makes things worse.&lt;/p&gt;
+&lt;h2 id=&#34;the-problem-it-solves&#34;&gt;The Problem It Solves&lt;/h2&gt;
+&lt;p&gt;When a BGP speaker restarts (software upgrade, process crash, failover), it tears down all its sessions. Every peer withdraws the routes it learned from that speaker, and the network reconverges. This takes time — seconds to minutes, depending on your topology.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Network Automation with Ansible: A Practical Starting Point</title>
+      <link>http://localhost:1313/posts/network-automation-ansible/</link>
+      <pubDate>Fri, 05 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/network-automation-ansible/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Most network automation tutorials start with a playbook that configures a VLAN. That&amp;rsquo;s fine, but it skips the part where you understand &lt;em&gt;why&lt;/em&gt; Ansible is structured the way it is and when you should reach for something else.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s a practical foundation.&lt;/p&gt;
+&lt;h2 id=&#34;why-ansible-for-networks&#34;&gt;Why Ansible for Networks?&lt;/h2&gt;
+&lt;p&gt;Ansible uses an agentless model — it connects via SSH (or NETCONF, or HTTPS depending on the platform). No agent to install. For network devices, this is almost always the right model.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>OSPF LSA Types: A Field Reference</title>
+      <link>http://localhost:1313/posts/ospf-lsa-types/</link>
+      <pubDate>Sat, 14 Jun 2025 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/ospf-lsa-types/</guid>
+      <description>
+        
+          
+            &lt;p&gt;OSPF link-state advertisements are the currency of the protocol. Understanding which LSA type carries what information — and who generates it — is essential for troubleshooting convergence issues.&lt;/p&gt;
+&lt;h2 id=&#34;quick-reference&#34;&gt;Quick Reference&lt;/h2&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Type&lt;/th&gt;
+					&lt;th&gt;Name&lt;/th&gt;
+					&lt;th&gt;Originated By&lt;/th&gt;
+					&lt;th&gt;Scope&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;1&lt;/td&gt;
+					&lt;td&gt;Router LSA&lt;/td&gt;
+					&lt;td&gt;Every router&lt;/td&gt;
+					&lt;td&gt;Single area&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;2&lt;/td&gt;
+					&lt;td&gt;Network LSA&lt;/td&gt;
+					&lt;td&gt;DR on broadcast segment&lt;/td&gt;
+					&lt;td&gt;Single area&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;3&lt;/td&gt;
+					&lt;td&gt;Summary LSA&lt;/td&gt;
+					&lt;td&gt;ABR&lt;/td&gt;
+					&lt;td&gt;Area → backbone&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;4&lt;/td&gt;
+					&lt;td&gt;ASBR Summary&lt;/td&gt;
+					&lt;td&gt;ABR&lt;/td&gt;
+					&lt;td&gt;Area → backbone&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;5&lt;/td&gt;
+					&lt;td&gt;AS External&lt;/td&gt;
+					&lt;td&gt;ASBR&lt;/td&gt;
+					&lt;td&gt;Entire OSPF domain&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;7&lt;/td&gt;
+					&lt;td&gt;NSSA External&lt;/td&gt;
+					&lt;td&gt;ASBR in NSSA&lt;/td&gt;
+					&lt;td&gt;Single NSSA area&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;type-1--router-lsa&#34;&gt;Type 1 — Router LSA&lt;/h2&gt;
+&lt;p&gt;Every OSPF router originates one Type 1 LSA per area it belongs to. It describes:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

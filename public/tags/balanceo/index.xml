@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Balanceo on netlog</title>
+    <link>http://localhost:1313/tags/balanceo/</link>
+    <description>Recent content in Balanceo on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/balanceo/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>VyOS 1.5: MultiWAN con Balanceo de Carga y Failover</title>
+      <link>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Tener dos proveedores de internet solo sirve si el router sabe usarlos. VyOS resuelve esto con el módulo &lt;strong&gt;WAN Load Balancing&lt;/strong&gt; (&lt;code&gt;load-balancing wan&lt;/code&gt;), que reparte las conexiones nuevas entre varios enlaces, vigila la salud de cada uno y los saca de rotación cuando fallan — todo desde el mismo árbol de configuración, sin scripts externos ni marcas de mangle a mano como en otras plataformas.&lt;/p&gt;
+&lt;p&gt;Este post construye la configuración completa sobre &lt;strong&gt;VyOS 1.5 (Circinus)&lt;/strong&gt;, paso a paso, explicando qué hace cada bloque y por qué está ahí.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</title>
+      <link>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El balanceo de dos enlaces WAN en MikroTik es uno de esos temas donde la documentación oficial muestra el esqueleto pero omite los detalles que hacen que la configuración sea estable en producción. Este post cubre la implementación completa con &lt;strong&gt;Per-Connection Classifier (PCC)&lt;/strong&gt;, failover automático con &lt;strong&gt;Netwatch&lt;/strong&gt;, y las reglas de mangle necesarias para que el tráfico saliente y las conexiones establecidas se comporten correctamente.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP1 ─── ether1 (100 Mbps)  ┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                              ├─── MikroTik ─── LAN (192.168.1.0/24)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP2 ─── ether2 (100 Mbps)  ┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Variable&lt;/th&gt;
+					&lt;th&gt;ISP1&lt;/th&gt;
+					&lt;th&gt;ISP2&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Interfaz&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether2&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;IP del router&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.2/30&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.2/30&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Gateway&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Ajusta las IPs a tu entorno. El procedimiento es idéntico con direcciones DHCP — solo cambia cómo obtienes el gateway.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>

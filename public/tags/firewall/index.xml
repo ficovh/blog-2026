@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Firewall on netlog</title>
+    <link>http://localhost:1313/tags/firewall/</link>
+    <description>Recent content in Firewall on netlog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Francisco Valladolid</copyright>
+    <lastBuildDate>Wed, 21 Oct 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/tags/firewall/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WireGuard en OpenBSD 8.0 para Road Warriors con Acceso a la LAN</title>
+      <link>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</link>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/wireguard-openbsd-roadwarrior/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un &lt;em&gt;road warrior&lt;/em&gt; es el usuario que se conecta desde donde esté: la laptop en un hotel, el teléfono en la red del aeropuerto, la casa de un técnico de guardia. No tiene IP fija, cambia de red varias veces al día y necesita llegar a lo mismo de siempre: el NAS, la consola del hipervisor, el ERP, la impresora de la oficina.&lt;/p&gt;
+&lt;p&gt;WireGuard es la herramienta correcta para esto. Es pequeño, rápido, sobrevive a los cambios de red sin renegociar nada y su configuración cabe en una pantalla. En OpenBSD además no hay que instalar nada: el driver &lt;a href=&#34;https://man.openbsd.org/wg.4&#34;&gt;&lt;code&gt;wg(4)&lt;/code&gt;&lt;/a&gt; es parte del kernel desde la 6.8, y todo se configura con &lt;code&gt;ifconfig&lt;/code&gt; y &lt;code&gt;pf&lt;/code&gt;, las mismas herramientas con las que ya administras el resto del firewall.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS 1.5: MultiWAN con Balanceo de Carga y Failover</title>
+      <link>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</link>
+      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-multiwan-balanceo-failover/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Tener dos proveedores de internet solo sirve si el router sabe usarlos. VyOS resuelve esto con el módulo &lt;strong&gt;WAN Load Balancing&lt;/strong&gt; (&lt;code&gt;load-balancing wan&lt;/code&gt;), que reparte las conexiones nuevas entre varios enlaces, vigila la salud de cada uno y los saca de rotación cuando fallan — todo desde el mismo árbol de configuración, sin scripts externos ni marcas de mangle a mano como en otras plataformas.&lt;/p&gt;
+&lt;p&gt;Este post construye la configuración completa sobre &lt;strong&gt;VyOS 1.5 (Circinus)&lt;/strong&gt;, paso a paso, explicando qué hace cada bloque y por qué está ahí.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>OPNsense como Firewall Básico para ISP</title>
+      <link>http://localhost:1313/posts/opnsense-firewall-isp-basico/</link>
+      <pubDate>Tue, 14 Jul 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-firewall-isp-basico/</guid>
+      <description>
+        
+          
+            &lt;p&gt;Un ISP tiene requisitos distintos a una red corporativa. No hay usuarios internos navegando sitios de entretenimiento — hay clientes con IPs asignadas, tránsito hacia upstream providers, equipos de red que deben protegerse del tráfico de clientes, y un plano de gestión que no puede quedar expuesto. OPNsense cubre este caso de uso con solidez si entiendes qué configurar y en qué orden.&lt;/p&gt;
+&lt;h2 id=&#34;topología-de-referencia&#34;&gt;Topología de referencia&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;Upstream (tránsito)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;       │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em0 ] — WAN / Transit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   OPNsense
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em1 ] — Red de clientes (PPPoE o IPs estáticas)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;6&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;   [ em2 ] — Gestión (OOB / equipos de red)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Interfaz&lt;/th&gt;
+					&lt;th&gt;Nombre&lt;/th&gt;
+					&lt;th&gt;Red&lt;/th&gt;
+					&lt;th&gt;Propósito&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em0&lt;/td&gt;
+					&lt;td&gt;WAN&lt;/td&gt;
+					&lt;td&gt;IP del upstream&lt;/td&gt;
+					&lt;td&gt;Tránsito hacia internet&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em1&lt;/td&gt;
+					&lt;td&gt;CLIENTES&lt;/td&gt;
+					&lt;td&gt;100.64.0.0/22&lt;/td&gt;
+					&lt;td&gt;Segmento de clientes (CG-NAT o pública)&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;em2&lt;/td&gt;
+					&lt;td&gt;MGMT&lt;/td&gt;
+					&lt;td&gt;10.255.0.0/24&lt;/td&gt;
+					&lt;td&gt;Gestión de infraestructura&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;100.64.0.0/10&lt;/code&gt; es el espacio CGNAT (RFC 6598). Úsalo si no tienes IPs públicas para todos tus clientes.&lt;/p&gt;
+&lt;/blockquote&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>VyOS: Primera Configuración — NAT, Firewall, Rutas Estáticas y VLANs</title>
+      <link>http://localhost:1313/posts/vyos-primera-configuracion/</link>
+      <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/vyos-primera-configuracion/</guid>
+      <description>
+        
+          
+            &lt;p&gt;VyOS es un router/firewall de código abierto basado en Debian. A diferencia de equipos como MikroTik o Cisco, toda la configuración vive en un árbol jerárquico que se edita en &lt;strong&gt;modo de configuración&lt;/strong&gt; y se confirma con &lt;code&gt;commit&lt;/code&gt;. Este modelo — inspirado en Junos — hace que los cambios sean atómicos y reversibles, lo cual es una ventaja real en producción.&lt;/p&gt;
+&lt;p&gt;Este post cubre los cuatro bloques fundamentales para dejar un router VyOS operativo: NAT, Firewall, Rutas Estáticas y VLANs.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>Dual WAN en MikroTik RouterOS v7: Balanceo y Failover con PCC</title>
+      <link>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/mikrotik-dual-wan-balanceo/</guid>
+      <description>
+        
+          
+            &lt;p&gt;El balanceo de dos enlaces WAN en MikroTik es uno de esos temas donde la documentación oficial muestra el esqueleto pero omite los detalles que hacen que la configuración sea estable en producción. Este post cubre la implementación completa con &lt;strong&gt;Per-Connection Classifier (PCC)&lt;/strong&gt;, failover automático con &lt;strong&gt;Netwatch&lt;/strong&gt;, y las reglas de mangle necesarias para que el tráfico saliente y las conexiones establecidas se comporten correctamente.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP1 ─── ether1 (100 Mbps)  ┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;                              ├─── MikroTik ─── LAN (192.168.1.0/24)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;ln&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;cl&#34;&gt;ISP2 ─── ether2 (100 Mbps)  ┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;Variable&lt;/th&gt;
+					&lt;th&gt;ISP1&lt;/th&gt;
+					&lt;th&gt;ISP2&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Interfaz&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;ether2&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;IP del router&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.2/30&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.2/30&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Gateway&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;203.0.113.1&lt;/code&gt;&lt;/td&gt;
+					&lt;td&gt;&lt;code&gt;198.51.100.1&lt;/code&gt;&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Ajusta las IPs a tu entorno. El procedimiento es idéntico con direcciones DHCP — solo cambia cómo obtienes el gateway.&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+    <item>
+      <title>OPNsense: 5 VLANs, Aislamiento y Seguridad de Perímetro</title>
+      <link>http://localhost:1313/posts/opnsense-vlans-firewall/</link>
+      <pubDate>Tue, 07 Apr 2026 00:00:00 +0000</pubDate>
+      
+      <guid>http://localhost:1313/posts/opnsense-vlans-firewall/</guid>
+      <description>
+        
+          
+            &lt;p&gt;OPNsense es un firewall serio. Pero la GUI puede generar confusión sobre el orden correcto de operaciones — especialmente cuando combinas VLANs, interfaces, y reglas de firewall que dependen unas de otras. Este post sigue el orden exacto en que debes hacer cada paso para llegar a una configuración funcional y segura.&lt;/p&gt;
+&lt;h2 id=&#34;escenario&#34;&gt;Escenario&lt;/h2&gt;
+&lt;p&gt;Un único puerto físico (&lt;code&gt;em1&lt;/code&gt;) actúa como trunk hacia un switch administrado. Cinco VLANs para segmentos distintos:&lt;/p&gt;
+          
+          
+        
+      </description>
+    </item>
+    
+  </channel>
+</rss>
